@@ -1,8 +1,11 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from .models import Users, CapstoneGroups, UserProfile
-
-
+    
+class EmailAndPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+    
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
@@ -11,7 +14,7 @@ class UsersSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        http_method = self.context.get("request").lower()
+        http_method = self.context.get("request")
 
         if http_method in ["put", "patch"]:
             self.fields.pop("email", None)

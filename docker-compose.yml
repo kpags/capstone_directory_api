@@ -4,9 +4,9 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile
-    command: gunicorn capstone_directory_api.wsgi:application --bind 0.0.0.0:9000 --timeout 30 --workers 2 # --reload  
+    command: gunicorn capstone_directory_api.wsgi:application --bind 0.0.0.0:8000 --timeout 30 --workers 2 --reload  
     ports:
-      - 9000:9000
+      - 8000:8000
     environment:
       - .env
     volumes:
@@ -16,7 +16,7 @@ services:
     depends_on:
       - postgres
     expose:
-      - 9000
+      - 8000
 
   postgres:
     container_name: postgres_capstone

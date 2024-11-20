@@ -3,8 +3,6 @@ import uuid
 from django.contrib.auth.hashers import (
     make_password,
 )
-from django.contrib.auth.models import AbstractUser
-
 
 # Create your models here.
 class CapstoneGroups(models.Model):
@@ -18,7 +16,7 @@ class CapstoneGroups(models.Model):
         return f"Group #{self.number} of S.Y {self.academic_year}"
 
 
-class Users(AbstractUser):
+class Users(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -48,15 +46,6 @@ class Users(AbstractUser):
     )
     is_active = models.BooleanField(default=True)
 
-    # Removed columns
-    date_joined = None
-    last_login = None
-    username = None
-    is_anonymous = None
-
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
-
     def save(self, *args, **kwargs):
         self.first_name = self.first_name.title()
         self.middle_name = (
@@ -64,13 +53,13 @@ class Users(AbstractUser):
         )
         self.last_name = self.last_name.title()
         self.email = self.email.lower()
-        self.roles = self.roles.lower()
+        self.role = self.role.lower()
         self.password = make_password(self.password)
 
         super(Users, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.email} - {self.roles}"
+        return f"{self.email} - {self.role}"
 
 
 class UserProfile(models.Model):

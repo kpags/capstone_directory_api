@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update \
-    && apt-get -y install netcat-openbsd gcc postgresql \
+    && apt-get -y install netcat gcc postgresql \
     && apt-get clean \
     && pip install psycopg2-binary
 
