@@ -26,3 +26,9 @@ class UsersSerializer(serializers.ModelSerializer):
         if http_method in ["put", "patch"]:
             self.fields.pop("email", None)
             self.fields.pop("password", None)
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = "__all__"
+        depth = 1

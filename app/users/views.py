@@ -10,6 +10,7 @@ from .serializers import (
     UsersSerializer,
     EmailAndPasswordSerializer,
     ChangeCurrentPasswordSerializer,
+    UserProfileSerializer
 )
 from rest_framework_simplejwt.tokens import RefreshToken
 from utils.auth import encode_tokens
@@ -113,3 +114,18 @@ class UsersViewset(viewsets.ModelViewSet):
             context["request"] = method
 
         return context
+
+class UserProfileViewset(viewsets.ModelViewSet):
+    queryset = UserProfile.objects.order_by("user__last_name")
+    serializer_class = UserProfileSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ["user__first_name", "user__last_name", "user__email"]
+    
+    def get_queryset(self):
+        user = self.request.instance
+        role = user.role
+        
+        if role.lower() in ["admin", "administrator"]:
+            return UserProfile.objects.order_by("user__last_name").select_related("user")
+        else:
+            return UserProfile.objects.filter(user=user)
