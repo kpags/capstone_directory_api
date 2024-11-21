@@ -1,8 +1,9 @@
 from django.db import models
-import uuid
+import uuid, os
 from django.contrib.auth.hashers import (
     make_password,
 )
+
 
 # Create your models here.
 class CapstoneGroups(models.Model):
@@ -54,7 +55,11 @@ class Users(models.Model):
         self.last_name = self.last_name.title()
         self.email = self.email.lower()
         self.role = self.role.lower()
-        self.password = make_password(self.password)
+
+        hash_prefix = os.getenv("ALLOWED_HASHED_PREFIX")
+
+        if not self.password.startswith(hash_prefix):
+            self.password = make_password(self.password)
 
         super(Users, self).save(*args, **kwargs)
 
