@@ -16,7 +16,7 @@ class CapstoneGroups(models.Model):
     def __str__(self):
         return f"Group #{self.number} of S.Y {self.academic_year}"
 
-
+    
 class Users(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -37,13 +37,6 @@ class Users(models.Model):
         null=True,
         on_delete=models.SET_NULL,
         related_name="capstone_group",
-    )
-    advisory_group = models.ForeignKey(
-        CapstoneGroups,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="group_technical_advisor",  # For Faculty/Coordinator only
     )
     is_active = models.BooleanField(default=True)
 
@@ -95,3 +88,13 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.email}'s User Profile"
+
+class TechnicalAdvisorGroups(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    group = models.ForeignKey(CapstoneGroups, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name} - Group {self.group.number} of {self.group.academic_year}"

@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Users, UserProfile, CapstoneGroups
+from .models import Users, UserProfile, CapstoneGroups, TechnicalAdvisorGroups
 from .serializers import (
     UsersSerializer,
     EmailAndPasswordSerializer,
@@ -22,6 +22,35 @@ from django.contrib.auth.hashers import (
 
 
 # Create your views here.
+class MeAPIView(APIView):
+    permission_classes = [IsActive]
+    
+    def get(self, request):
+        user = request.instance
+        
+        data = {
+            "id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "role": user.role,
+            "is_active": user.is_active,
+        }
+        
+        if hasattr(user, "group"):
+            if user.group:
+                data["group"] = {
+                    "id": user.group.id,
+                    "number": user.group.number,
+                    "academic_year": user.group
+                }
+        
+        technical_advisor_group = TechnicalAdvisorGroups.objects.filter(user=user).exists()
+        
+        data["is_technical_adviser"] = technical_advisor_group
+            
+        return Response(data, status=status.HTTP_200_OK)
+    
 class LoginAPIView(APIView):
     permission_classes = []
     serializer_class = EmailAndPasswordSerializer

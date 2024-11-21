@@ -2,7 +2,7 @@ from django.urls import path, include
 
 from . import views
 from rest_framework.routers import DefaultRouter
-from .views import UsersViewset, UserProfileViewset, LoginAPIView, ChangeCurrentPasswordAPIView
+from .views import UsersViewset, UserProfileViewset, LoginAPIView, ChangeCurrentPasswordAPIView, MeAPIView
 
 app_name = "users"
 
@@ -11,6 +11,7 @@ router.register(r"user-viewset", views.UsersViewset, basename="user-viewset")
 router.register(r"user-profile", views.UserProfileViewset, basename="user-profile")
 
 urlpatterns = [
+    path("me/", views.MeAPIView.as_view(), name="me"),
     path("login/", views.LoginAPIView.as_view(), name="login"),
     path(
         "change-password/",
