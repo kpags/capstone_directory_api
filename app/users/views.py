@@ -15,7 +15,7 @@ from .serializers import (
 )
 from rest_framework_simplejwt.tokens import RefreshToken
 from utils.auth import encode_tokens
-from utils.permissions import IsActive, IsAdmin
+from utils.permissions import IsActive, IsAdmin, IsAdminOrReadOnly
 from utils.validations import password_validator_throws_exception
 from django.contrib.auth.hashers import (
     check_password,
@@ -135,13 +135,13 @@ class UsersViewset(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ["first_name", "last_name", "email"]
     filterset_fields = ["role", "is_active", "course", "specialization"]
+    permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         method = self.request.method
 
-        if method in ["PUT", "PATCH"]:
-            context["request"] = method
+        context["request"] = method
 
         return context
     

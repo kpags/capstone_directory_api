@@ -15,7 +15,19 @@ class IsActive(BasePermission):
 
             user = payload.get("instance", None)
             return bool(user.is_active)
+        
+class IsAdminOrReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        method = request.method
 
+        if method == "GET":
+            return bool(request.instance and request.instance.is_active)
+        else:
+            auth = JWTAuthentication()
+            payload = auth.authenticate(request=request)
+
+            user = payload.get("instance", None)
+            return bool(user.role.lower() in ["admin", "administrator"])
 
 class IsAdmin(BasePermission):
     def has_permission(self, request, view):
