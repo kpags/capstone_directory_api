@@ -26,9 +26,20 @@ class UsersSerializer(serializers.ModelSerializer):
         if http_method in ["put", "patch"]:
             self.fields.pop("email", None)
             self.fields.pop("password", None)
+            
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.pop("password", None)
+        
+        return representation
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = "__all__"
         depth = 1
+        
+class CapstoneGroupsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CapstoneGroups
+        fields = "__all__"

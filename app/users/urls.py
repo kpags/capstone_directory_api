@@ -2,13 +2,14 @@ from django.urls import path, include
 
 from . import views
 from rest_framework.routers import DefaultRouter
-from .views import UsersViewset, UserProfileViewset, LoginAPIView, ChangeCurrentPasswordAPIView, MeAPIView
+from .views import UsersViewset, UserProfileViewset, CapstoneGroupsViewset, LoginAPIView, ChangeCurrentPasswordAPIView, MeAPIView
 
 app_name = "users"
 
 router = DefaultRouter()
 router.register(r"user-viewset", views.UsersViewset, basename="user-viewset")
 router.register(r"user-profile", views.UserProfileViewset, basename="user-profile")
+router.register(r"groups", views.CapstoneGroupsViewset, basename="groups")
 
 urlpatterns = [
     path("me/", views.MeAPIView.as_view(), name="me"),

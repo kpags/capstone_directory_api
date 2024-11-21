@@ -70,7 +70,7 @@ THIRD_PARTY_APPS = [
     "debug_toolbar",
 ]
 
-LOCAL_APPS = ["users"]
+LOCAL_APPS = ["users", "capstone_projects"]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
 

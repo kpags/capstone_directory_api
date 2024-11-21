@@ -12,6 +12,8 @@ class CapstoneGroups(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     number = models.CharField()
     academic_year = models.CharField(max_length=255)
+    course = models.CharField(null=True, blank=True)
+    specialization = models.CharField(null=True, blank=True)
 
     def __str__(self):
         return f"Group #{self.number} of S.Y {self.academic_year}"
