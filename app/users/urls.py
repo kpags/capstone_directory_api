@@ -7,7 +7,7 @@ from .views import UsersViewset, UserProfileViewset, CapstoneGroupsViewset, Logi
 app_name = "users"
 
 router = DefaultRouter()
-router.register(r"user-viewset", views.UsersViewset, basename="user-viewset")
+router.register(r"user-view", views.UsersViewset, basename="user-view")
 router.register(r"user-profile", views.UserProfileViewset, basename="user-profile")
 router.register(r"groups", views.CapstoneGroupsViewset, basename="groups")
 

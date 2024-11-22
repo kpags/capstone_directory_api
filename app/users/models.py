@@ -26,6 +26,7 @@ class Users(models.Model):
     first_name = models.CharField(max_length=255)
     middle_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255)
+    student_number = models.CharField(null=True, blank=True)
     email = models.EmailField(unique=True)
     password = models.CharField()
     role = models.CharField(

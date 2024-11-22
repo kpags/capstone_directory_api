@@ -2,6 +2,8 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from .models import Users, CapstoneGroups, UserProfile
 
+class CSVFileSerializer(serializers.Serializer): # For bulk creation of users throgh upload
+    file = serializers.FileField()
 
 class EmailAndPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()

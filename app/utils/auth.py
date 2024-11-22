@@ -5,6 +5,7 @@ from users.models import Users
 from rest_framework.exceptions import AuthenticationFailed
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+ENV = os.environ.get("ENVIRONMENT", "dev")
 
 
 class JWTAuthentication(BaseAuthentication):
@@ -19,8 +20,9 @@ class JWTAuthentication(BaseAuthentication):
             expiry_date_obj = datetime.fromisoformat(expiry_date_str)
             current_date = datetime.now(timezone.utc)
 
-            if current_date.date() == expiry_date_obj.date():
-                raise AuthenticationFailed({"message": "Token already expired"})
+            if ENV.lower() in ["prod", "production"]:
+                if current_date.date() == expiry_date_obj.date():
+                    raise AuthenticationFailed({"message": "Token already expired"})
 
             try:
                 user = Users.objects.get(id=user_id)
