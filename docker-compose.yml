@@ -4,7 +4,7 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile
-    command: gunicorn capstone_directory_api.wsgi:application --bind 0.0.0.0:8000 --timeout 30 --workers 2 --reload  
+    command: gunicorn capstone_directory_api.wsgi:application --bind 0.0.0.0:8000 --timeout 30 --workers 2 # --reload  
     ports:
       - 8000:8000
     environment:
@@ -31,6 +31,43 @@ services:
     restart: always
     expose:
       - 5432
+    
+  redis:
+    container_name: redis_capstone
+    image: redis:7-alpine
+    restart: always
+
+  celery_worker:
+    container_name: celery_worker_1
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    command: celery -A capstone_directory_api worker -l info
+    volumes:
+      - .:/app
+    environment:
+      - ./app/.env
+    restart: always 
+    depends_on:
+      - redis
+      - postgres
+      - web
+
+  celery_beat:
+    container_name: celery_beat_1
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    command: celery -A capstone_directory_api beat -l info
+    volumes:
+      - .:/app
+    environment:
+      - ./app/.env
+    restart: always
+    depends_on:
+      - redis
+      - postgres
+      - web
 
 volumes:
   static_volume:

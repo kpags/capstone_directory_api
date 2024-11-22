@@ -11,7 +11,8 @@ from .serializers import (
     EmailAndPasswordSerializer,
     ChangeCurrentPasswordSerializer,
     UserProfileSerializer,
-    CapstoneGroupsSerializer
+    CapstoneGroupsSerializer,
+    CSVFileSerializer
 )
 from rest_framework_simplejwt.tokens import RefreshToken
 from utils.auth import encode_tokens
@@ -20,6 +21,9 @@ from utils.validations import password_validator_throws_exception
 from django.contrib.auth.hashers import (
     check_password,
 )
+from .tasks import upload_users_from_excel
+from django.core.cache import cache
+import pandas as pd
 
 
 # Create your views here.
@@ -153,6 +157,42 @@ class UsersViewset(viewsets.ModelViewSet):
             return Users.objects.order_by("last_name")
         else:
             return Users.objects.filter(id=user.id)
+        
+    @action(detail=False, methods=["POST"], serializer_class=CSVFileSerializer, url_path="upload-users")
+    def bulk_create_users(self, request):
+        data = request.data
+        
+        serializer = CSVFileSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        
+        file = data["file"]
+        if not str(file).endswith(".xlsx"):
+            return Response(
+                {"message": "Invalid file format. Please upload an excel file."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        df = pd.read_excel(file)
+        df = df.fillna('')
+        file_data = df.to_dict(orient="records")
+        
+        upload_users_from_excel.delay(file_data=file_data)
+        return Response({
+            "message": f"{str(file)} is being uploaded."
+        }, status=status.HTTP_201_CREATED)
+    
+    @action(detail=False, methods=["GET"], url_path="check-upload-status")
+    def check_users_upload_status(self, request):
+        is_uploaded = cache.get("users_upload", False)
+        
+        if is_uploaded:
+            message = "Recent upload of users was successful."
+        else:
+            message = "Recent upload of users is still in progress."
+            
+        return Response({
+            "status": is_uploaded,
+            "message": message
+        }, status=status.HTTP_200_OK)
 
 class UserProfileViewset(viewsets.ModelViewSet):
     queryset = UserProfile.objects.order_by("user__last_name")
