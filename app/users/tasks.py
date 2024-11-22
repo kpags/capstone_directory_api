@@ -9,8 +9,6 @@ from django.contrib.auth.hashers import (
 
 @shared_task
 def upload_users_from_excel(file_data):
-    print("File")
-    print(file_data)
     try:
         users_to_write = []
         
@@ -41,7 +39,7 @@ def upload_users_from_excel(file_data):
         Users.objects.bulk_create(users_to_write)
         print("Users created from excel file.")
             
-        cache.set('users_upload', True, timeout=180)
+        cache.set('users_upload', True, timeout=1800)
     except Exception as e:
         print(f"Error occurred while reading Excel file: {str(e)}")
         pass
