@@ -47,4 +47,8 @@ urlpatterns += [
         r"api/capstone-projects/",
         include("capstone_projects.urls", namespace="capstone_projects"),
     ),
+    re_path(
+        r"api/activity-logs/",
+        include("activity_logs.urls", namespace="activity_logs"),
+    ),
 ]

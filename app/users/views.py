@@ -24,6 +24,7 @@ from django.contrib.auth.hashers import (
 from .tasks import upload_users_from_excel
 from django.core.cache import cache
 import pandas as pd
+from utils.activity_logs import create_activity_log
 
 
 # Create your views here.
@@ -124,6 +125,8 @@ class ChangeCurrentPasswordAPIView(APIView):
             user = Users.objects.get(email=email)
             user.password = new_password
             user.save()
+            
+            create_activity_log(actor=user, action="Changed current password to a new password.")
 
             return Response(
                 {"message": "Password updated successfully."},
@@ -158,9 +161,37 @@ class UsersViewset(viewsets.ModelViewSet):
         else:
             return Users.objects.filter(id=user.id)
         
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        user = request.instance
+        
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+        serializer.save()
+                
+        create_activity_log(actor=user, action=f"Created user '{validated_data.get('email', 'Anonymous User')}'.")
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = request.instance 
+        
+        create_activity_log(actor=user, action=f"Updated user '{instance.email}'.")
+        return super().update(request, *args, **kwargs)
+    
+    def destroy(self, request, *args, **kwargs):
+        user = request.instance
+        instance = self.get_object()
+        
+        create_activity_log(actor=user, action=f"Deleted user '{instance.email}'.")
+        return super().destroy(request, *args, **kwargs)
+        
     @action(detail=False, methods=["POST"], serializer_class=CSVFileSerializer, url_path="upload-users")
     def bulk_create_users(self, request):
         data = request.data
+        user = request.instance
         
         serializer = CSVFileSerializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -176,6 +207,8 @@ class UsersViewset(viewsets.ModelViewSet):
         file_data = df.to_dict(orient="records")
         
         upload_users_from_excel.delay(file_data=file_data)
+        create_activity_log(actor=user, action="Uploaded an excel file of users.")
+        
         return Response({
             "message": f"{str(file)} is being uploaded."
         }, status=status.HTTP_201_CREATED)

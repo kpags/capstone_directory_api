@@ -23,9 +23,9 @@ class UsersSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        http_method = self.context.get("request")
+        http_method = self.context.get("request", None)
 
-        if http_method in ["put", "patch"]:
+        if http_method and http_method.lower() in ["put", "patch"]:
             self.fields.pop("email", None)
             self.fields.pop("password", None)
             
