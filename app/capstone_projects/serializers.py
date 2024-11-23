@@ -7,7 +7,7 @@ class CapstoneProjectsSerializer(serializers.ModelSerializer):
         model = CapstoneProjects
         fields = "__all__"
         depth = 1
-        
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         

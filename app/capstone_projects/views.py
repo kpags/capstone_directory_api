@@ -18,10 +18,12 @@ from .filters import CapstoneProjectsFilter
 from utils.pdf_keywords_generator import generate_pdf_keywords
 from utils.cloudinary import upload_to_cloudinary
 from utils.activity_logs import create_activity_log
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 # Create your views here.
+
 class CapstoneProjectsViewset(viewsets.ModelViewSet):
-    queryset = CapstoneProjects.objects.order_by('created_at')
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ['title', 'capstone_group__number', 'capstone_group__academic_year']
     filterset_class = CapstoneProjectsFilter
@@ -49,16 +51,23 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
             return CapstoneProjectsCustomSerializer
         
         return CapstoneProjectsSerializer
-    
+
+    @swagger_auto_schema()
     def get_queryset(self):
         user = self.request.instance
         role = user.role.lower()
         
         if role in ["admin", "administrator"]:
-            return CapstoneProjects.objects.order_by('created_at')
+            return CapstoneProjects.objects.order_by('created_at').order_by('-created_at')
         
-        return CapstoneProjects.objects.filter(capstone_group=user.group)
+        return CapstoneProjects.objects.filter(capstone_group=user.group).order_by('-created_at')
     
+    @swagger_auto_schema(
+        request_body=CapstoneProjectsCustomSerializer,
+        responses={
+            201: CapstoneProjectsCustomSerializer(many=False),
+        }
+    )
     def create(self, request, *args, **kwargs):
         user = request.instance
         data = request.data
@@ -97,30 +106,66 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         create_activity_log(actor=user, action=f"Uploaded capstone project '{project.title}' by Group#{project.capstone_group.number} of {project.capstone_group.course}.")
         return Response(serialized_data, status=status.HTTP_201_CREATED)
     
+    @swagger_auto_schema(
+        responses={
+            204: CapstoneProjectsSerializer(many=False),
+            401: "Only administrators can delete capstone projects."
+        }
+    )
     def destroy(self, request, *args, **kwargs):
         user = request.instance
         project = self.get_object()
         
         if not user.role.lower() in ["admin", "administrator"]:
-            raise ValidationError({
+            return Response({
                 "message": "Only administrators can delete capstone projects."
-            })
+            }, status=status.HTTP_401_UNAUTHORIZED)
             
         create_activity_log(actor=user, action=f"Deleted capstone project '{project.title}' by Group#{project.capstone_group.number} of {project.capstone_group.course}.")
         return super().destroy(request, *args, **kwargs)
     
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'title': openapi.Schema(type=openapi.TYPE_STRING, description='Title of the project'),
+                'ip_regristration': openapi.Schema(type=openapi.TYPE_STRING, description='Storange link of the file'),
+                'acm_paper': openapi.Schema(type=openapi.TYPE_STRING, description='Storange link of the file'),
+                'full_document': openapi.Schema(type=openapi.TYPE_STRING, description='Storange link of the file'),
+                'pubmat': openapi.Schema(type=openapi.TYPE_STRING, description='Storange link of the file'),
+                'approval_form': openapi.Schema(type=openapi.TYPE_STRING, description='Storange link of the file'),
+                'source_code': openapi.Schema(type=openapi.TYPE_STRING, description='Storange link of the file'),
+                'members': openapi.Schema(type=openapi.TYPE_STRING, description='Array of names of the members'),
+                'date_published': openapi.Schema(type=openapi.TYPE_STRING, description='Date'),
+                'status': openapi.Schema(type=openapi.TYPE_STRING, description='Project status'),
+            },
+            required=['field1'],  # Fields that are required
+        ),
+        responses={
+            200: CapstoneProjectsSerializer(many=False),
+            401: "Only administrators update the details capstone projects."
+        }
+    )
     def update(self, request, *args, **kwargs):
         user = request.instance
         project = self.get_object()
         
         if not user.role.lower() in ["admin", "administrator"]:
-            raise ValidationError({
-                "message": "Only administrators can update the details of capstone projects."
-            })
+            return Response({
+                "message": "Only administrators can update the details capstone projects."
+            }, status=status.HTTP_401_UNAUTHORIZED)
             
         create_activity_log(actor=user, action=f"Deleted capstone project '{project.title}' by Group#{project.capstone_group.number} of {project.capstone_group.course}.")
         return super().update(request, *args, **kwargs)
     
+    @swagger_auto_schema(
+        request_body=CapstoneProjectApprovalSerializer,
+        responses={
+            200: "Capstone project with ID '####' has been approved/disapproved by #####.",
+            400: "ProjectID is required to approve it.",
+            404: "Project with ID '####' does not exist."
+        }
+    )
     @action(detail=False, methods=["POST"], permission_classes=[IsAdmin], serializer_class=CapstoneProjectApprovalSerializer, url_path="approve")
     def approve_project(self, request):
         data = request.data
@@ -153,10 +198,18 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
                 "message": f"Capstone project with ID '{project_id}' has been {approve_word.lower()} by {user.get_full_name}."
             }, status=status.HTTP_200_OK)
         except CapstoneProjects.DoesNotExist:
-            raise ValidationError({
+            return Response({
                 "message": f"Project with ID '{project_id}' does not exist."
-            })
-            
+            }, status=status.HTTP_404_NOT_FOUND)
+    
+    @swagger_auto_schema(
+        request_body=CapstoneProjectBestProjectSerializer,
+        responses={
+            200: "Capstone project with ID '####' has been mared/removed as best project by #####.",
+            400: "ProjectID is required to make it a best project.",
+            404: "Project with ID '####' does not exist."
+        }
+    )
     @action(detail=False, methods=["POST"], permission_classes=[IsAdmin], serializer_class=CapstoneProjectBestProjectSerializer, url_path="best-project")
     def make_best_project(self, request):
         data = request.data

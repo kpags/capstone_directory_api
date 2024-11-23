@@ -25,12 +25,18 @@ from .tasks import upload_users_from_excel
 from django.core.cache import cache
 import pandas as pd
 from utils.activity_logs import create_activity_log
+from drf_yasg.utils import swagger_auto_schema
 
 
 # Create your views here.
 class MeAPIView(APIView):
     permission_classes = [IsActive]
     
+    @swagger_auto_schema(
+        responses={
+            200: "id, first_name, last_name, email, role, is_active, group, is_technical_adviser"
+        }
+    )
     def get(self, request):
         user = request.instance
         
@@ -61,6 +67,14 @@ class LoginAPIView(APIView):
     permission_classes = []
     serializer_class = EmailAndPasswordSerializer
 
+    @swagger_auto_schema(
+        request_body=EmailAndPasswordSerializer,
+        responses={
+            200: "user_id, access_token, refresh_token",
+            400: "Invalid email or password",
+            404: "User not yet registered"
+        }
+    )
     def post(self, request):
         data = request.data
 
@@ -102,6 +116,14 @@ class ChangeCurrentPasswordAPIView(APIView):
     permission_classes = [IsActive]
     serializer_class = ChangeCurrentPasswordSerializer
 
+    @swagger_auto_schema(
+        request_body=ChangeCurrentPasswordSerializer,
+        responses={
+            200: "Password updated successfully.",
+            400: "Password must not match the old password, must be at least 8 characters long, contain at least one digit, one uppercase letter, or one special character.",
+            404: "User not yet registered"
+        }
+    )
     def post(self, request):
         data = request.data
         user = request.instance
@@ -133,9 +155,13 @@ class ChangeCurrentPasswordAPIView(APIView):
                 status=status.HTTP_200_OK,
             )
         except Users.DoesNotExist:
-            raise ValidationError({"message": f"{email} is not yet a registered user."})
+             return Response(
+                {"message": f"{email} is not yet a registered user."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
+@swagger_auto_schema()
 class UsersViewset(viewsets.ModelViewSet):
     queryset = Users.objects.order_by("last_name")
     serializer_class = UsersSerializer
@@ -187,8 +213,14 @@ class UsersViewset(viewsets.ModelViewSet):
         
         create_activity_log(actor=user, action=f"Deleted user '{instance.email}'.")
         return super().destroy(request, *args, **kwargs)
-        
-    @action(detail=False, methods=["POST"], serializer_class=CSVFileSerializer, url_path="upload-users")
+    
+    @swagger_auto_schema(
+        manual_parameters=[],
+        responses={
+            400: "Invalid file format. Please upload an excel file."
+        }
+    )
+    @action(detail=False, methods=["POST"], serializer_class=CSVFileSerializer, url_path="upload-users", filter_backends=[])
     def bulk_create_users(self, request):
         data = request.data
         user = request.instance
@@ -213,7 +245,13 @@ class UsersViewset(viewsets.ModelViewSet):
             "message": f"{str(file)} is being uploaded."
         }, status=status.HTTP_201_CREATED)
     
-    @action(detail=False, methods=["GET"], url_path="check-upload-status")
+    @swagger_auto_schema(
+        manual_parameters=[],
+        responses={
+            200: "status: True/False, message: Recent upload of users was successful/is still in progress."
+        }
+    )
+    @action(detail=False, methods=["GET"], url_path="check-upload-status", filter_backends=[])
     def check_users_upload_status(self, request):
         is_uploaded = cache.get("users_upload", False)
         
@@ -227,6 +265,7 @@ class UsersViewset(viewsets.ModelViewSet):
             "message": message
         }, status=status.HTTP_200_OK)
 
+@swagger_auto_schema()
 class UserProfileViewset(viewsets.ModelViewSet):
     queryset = UserProfile.objects.order_by("user__last_name")
     serializer_class = UserProfileSerializer

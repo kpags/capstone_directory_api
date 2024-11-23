@@ -18,7 +18,7 @@ class ChangeCurrentPasswordSerializer(serializers.Serializer):
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
-        fields = "__all__"
+        exclude = ["password"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,12 +28,6 @@ class UsersSerializer(serializers.ModelSerializer):
         if http_method and http_method.lower() in ["put", "patch"]:
             self.fields.pop("email", None)
             self.fields.pop("password", None)
-            
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation.pop("password", None)
-        
-        return representation
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
