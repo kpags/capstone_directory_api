@@ -16,7 +16,7 @@ from .serializers import (
 )
 from rest_framework_simplejwt.tokens import RefreshToken
 from utils.auth import encode_tokens
-from utils.permissions import IsActive, IsAdmin, IsAdminOrReadOnly
+from utils.permissions import IsActive, IsAdmin, IsAdminOrReadOnly, IsAdminOrCoordinator
 from utils.validations import password_validator_throws_exception
 from django.contrib.auth.hashers import (
     check_password,
@@ -244,5 +244,5 @@ class UserProfileViewset(viewsets.ModelViewSet):
         
 class CapstoneGroupsViewset(viewsets.ModelViewSet):
     queryset = CapstoneGroups.objects.order_by("created_at")
-    permission_classes = [IsAdmin]
+    permission_classes = [IsAdminOrCoordinator]
     serializer_class = CapstoneGroupsSerializer
