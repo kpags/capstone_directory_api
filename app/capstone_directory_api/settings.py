@@ -71,7 +71,7 @@ THIRD_PARTY_APPS = [
     "django_celery_beat",
 ]
 
-LOCAL_APPS = ["users", "capstone_projects", "activity_logs"]
+LOCAL_APPS = ["users", "capstone_projects", "activity_logs", "notifications"]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
 

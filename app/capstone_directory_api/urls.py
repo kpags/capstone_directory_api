@@ -51,4 +51,8 @@ urlpatterns += [
         r"api/activity-logs/",
         include("activity_logs.urls", namespace="activity_logs"),
     ),
+     re_path(
+        r"api/notifications/",
+        include("notifications.urls", namespace="notifications"),
+    ),
 ]
