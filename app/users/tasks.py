@@ -25,11 +25,11 @@ def upload_users_from_excel(file_data):
             
             users_to_write.append(
                 Users(
-                    first_name=first_name,
-                    last_name=last_name,
+                    first_name=first_name.title(),
+                    last_name=last_name.title(),
                     email=email,
                     password=password,
-                    role=role,
+                    role=role.lower(),
                     course=course,
                     specialization=specialization,
                     student_number=student_number

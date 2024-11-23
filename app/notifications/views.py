@@ -32,6 +32,8 @@ class NotificationsViewset(viewsets.ModelViewSet):
             queryset = Notifications.objects.filter(
                 Q(to_user=user) | Q(to_group=user.group)
             )
+        elif role.lower() in ["admin", "administrator"]:
+            queryset = Notifications.objects.order_by('-created_at')
         else:
             queryset = Notifications.objects.filter(to_user=user)
             
