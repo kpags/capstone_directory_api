@@ -26,6 +26,7 @@ from django.core.cache import cache
 import pandas as pd
 from utils.activity_logs import create_activity_log
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 
 # Create your views here.
@@ -33,8 +34,29 @@ class MeAPIView(APIView):
     permission_classes = [IsActive]
     
     @swagger_auto_schema(
-        responses={
-            200: "id, first_name, last_name, email, role, is_active, group, is_technical_adviser"
+         responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='User ID'),
+                    'first_name': openapi.Schema(type=openapi.TYPE_STRING, description='First Name'),
+                    'last_name': openapi.Schema(type=openapi.TYPE_STRING, description='Last Name'),
+                    'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email Address'),
+                    'role': openapi.Schema(type=openapi.TYPE_STRING, description='Role of the User'),
+                    'is_active': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Whether the User is Active'),
+                    'group': openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Group ID'),
+                            'number': openapi.Schema(type=openapi.TYPE_INTEGER, description='Group Number'),
+                            'academic_year': openapi.Schema(type=openapi.TYPE_STRING, description='Academic Year'),
+                        },
+                        description='Group Information',
+                        nullable=True,  # To allow `null` if `group` is absent
+                    ),
+                    'is_technical_adviser': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='Whether the User is a Technical Adviser'),
+                },
+            )
         }
     )
     def get(self, request):
