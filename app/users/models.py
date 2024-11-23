@@ -61,6 +61,10 @@ class Users(models.Model):
 
     def __str__(self):
         return f"{self.email} - {self.role}"
+    
+    @property
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
 
 
 class UserProfile(models.Model):

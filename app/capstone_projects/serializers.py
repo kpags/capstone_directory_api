@@ -8,6 +8,15 @@ class CapstoneProjectsSerializer(serializers.ModelSerializer):
         fields = "__all__"
         depth = 1
         
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        http_method = self.context.get("request", None)
+        
+        if http_method and http_method in ["put", "patch", "PUT", "PATCH"]:
+            self.fields.pop('is_best_project', None)
+            self.fields.pop('is_approved', None)
+        
 class CapstoneProjectsCustomSerializer(serializers.Serializer):
     capstone_group_id = serializers.CharField() # get UUID of the group
     title = serializers.CharField()
@@ -19,16 +28,12 @@ class CapstoneProjectsCustomSerializer(serializers.Serializer):
     source_code = serializers.CharField(required=False)
     members = serializers.ListField(child=serializers.CharField(), allow_empty=True, required=False)
     date_published = serializers.DateField(required=False)
-    is_approved = serializers.BooleanField(required=False)
     status = serializers.CharField(required=False)
-    is_best_project = serializers.BooleanField(required=False)
+
+class CapstoneProjectApprovalSerializer(serializers.Serializer):
+    project_id = serializers.CharField()
+    is_approved = serializers.BooleanField()
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        user = self.context.get('user', None)
-        
-        if user and user.role.lower() not in ['admin', 'administrator']:
-            self.fields.pop('is_approved')
-            self.fields.pop('status')
-            self.fields.pop('is_best_project')
+class CapstoneProjectBestProjectSerializer(serializers.Serializer):
+    project_id = serializers.CharField()
+    is_best_project = serializers.BooleanField()

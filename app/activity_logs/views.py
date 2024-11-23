@@ -12,7 +12,7 @@ from utils.permissions import IsActive, IsAdmin
 
 # Create your views here.
 class ActivityLogsViewset(viewsets.ModelViewSet):
-    queryset = ActivityLogs.objects.order_by("created_at")
+    queryset = ActivityLogs.objects.order_by("-created_at")
     serializer_class = ActivityLogsSerializer
     permission_classes = [IsAdmin]
     filter_backends = [DjangoFilterBackend, SearchFilter]
