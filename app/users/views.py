@@ -27,6 +27,9 @@ import pandas as pd
 from utils.activity_logs import create_activity_log
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
 
 
 # Create your views here.
@@ -264,11 +267,31 @@ class UsersViewset(viewsets.ModelViewSet):
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
-        serializer.save()
-                
+        created_user = serializer.save()
+        
+        self.send_account_creation_email(created_user, f"{created_user.first_name}.{created_user.last_name}")
         create_activity_log(actor=user, action=f"Created user '{validated_data.get('email', 'Anonymous User')}'.")
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    def send_account_creation_email(self, created_user: Users, plain_text_password):
+        context = {
+            "name": created_user.get_full_name,
+            "email": created_user.email,
+            "password": plain_text_password,
+        }
+        
+        email_html_message = render_to_string("email/account_creation.html", context)
+        
+        send_mail(
+            subject="Capstone Directory Account Creation",
+            message="",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[created_user.email],
+            html_message=email_html_message,
+            auth_user=settings.EMAIL_HOST_USER,
+            auth_password=settings.EMAIL_HOST_PASSWORD,
+        )
     
     def update(self, request, *args, **kwargs):
         instance = self.get_object()

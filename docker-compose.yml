@@ -9,6 +9,7 @@ services:
       - 8000:8000
     environment:
       - .env
+      - CONTAINER_NAME=web
     volumes:
       - static_volume:/usr/src/app/staticfiles
       - media_volume:/usr/src/app/mediafiles
