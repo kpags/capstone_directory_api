@@ -134,6 +134,51 @@ class LoginAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+class ForgotPasswordAPIView(APIView):
+    permission_classes = ()
+    serializer_classes = EmailAndPasswordSerializer
+    
+    @swagger_auto_schema(
+        request_body=EmailAndPasswordSerializer,
+        responses={
+            200: "Password successfully changed.",
+            400: "User is not active.",
+            404: "Email is not yet a registered user."
+        }
+    )
+    def post(self, request):
+        data = request.data
+        
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exceptions=True)
+        valdiated_data = serializer.validated_data
+        
+        email = valdiated_data["email"]
+        password = valdiated_data["password"]
+        
+        existing_user = Users.objects.filter(email=email)
+        
+        if not existing_user:
+            return Response(
+                {"message": f"{email} is not yet a registered user."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
+        user = existing_user.first()
+        
+        if not user.is_active:
+            return Response(
+                {"message": "User is not active."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+            
+        user.password = password
+        user.save()
+        
+        return Response({
+            "message": "Password successfully changed.",
+        }, status=status.HTTP_200_OK)
+        
 
 class ChangeCurrentPasswordAPIView(APIView):
     permission_classes = [IsActive]

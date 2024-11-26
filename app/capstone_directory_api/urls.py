@@ -6,6 +6,10 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.conf.urls.static import static
 from django.conf import settings
+from utils.permissions import IsAdmin
+import os
+
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "DEV")
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -14,7 +18,7 @@ schema_view = get_schema_view(
         description="API documentation for Dropify PH API",
     ),
     public=True,
-    permission_classes=(),
+    permission_classes=(IsAdmin,) if ENVIRONMENT == "PROD" else (),
 )
 
 urlpatterns = (
