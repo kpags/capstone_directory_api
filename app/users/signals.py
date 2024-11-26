@@ -20,7 +20,7 @@ def create_notification(sender, instance: Users, **kwargs):
     
     if role:
         if role.lower() in ["coordinator", "capstone coordinator", "faculty"]:
-            action = f"{full_name} role has been changed to {role}."
+            action = f"{full_name} role has been changed to {role.upper()}."
         
             Notifications.objects.create(
                 to_user=instance,
