@@ -186,12 +186,13 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         try:
             existing_project = CapstoneProjects.objects.get(id=project_id)
             existing_project.is_approved = is_approved
+            existing_project._for_approval = True
             existing_project.save()
             
             if is_approved:
                 approve_word = "Approved"
             else:
-                approve_word = "Disapproved"
+                approve_word = "Rejected"
             
             create_activity_log(actor=user, action=f"{approve_word} the capstone project '{existing_project.title}' by Group#{existing_project.capstone_group.number} of {existing_project.capstone_group.course}.")
             return Response({
@@ -230,6 +231,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         try:
             existing_project = CapstoneProjects.objects.get(id=project_id)
             existing_project.is_best_project = is_best_project
+            existing_project._for_best_project = True
             existing_project.save()
             
             if is_best_project:
