@@ -87,6 +87,7 @@ class MeAPIView(APIView):
         return Response(data, status=status.HTTP_200_OK)
     
 class LoginAPIView(APIView):
+    authentication_classes = []
     permission_classes = []
     serializer_class = EmailAndPasswordSerializer
 
@@ -135,7 +136,8 @@ class LoginAPIView(APIView):
             )
 
 class ForgotPasswordAPIView(APIView):
-    permission_classes = ()
+    authentication_classes = []
+    permission_classes = []
     serializer_classes = EmailAndPasswordSerializer
     
     @swagger_auto_schema(
