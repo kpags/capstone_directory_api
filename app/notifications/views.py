@@ -10,10 +10,11 @@ from users.models import Users
 from .serializers import (NotificationsSerializer, NotificationReadCustomSerializer)
 from utils.permissions import IsActive, IsAdmin
 from django.db.models import Q, OuterRef, When, Case, BooleanField
+from drf_yasg.utils import swagger_auto_schema
 
 # Create your views here.
 class NotificationsViewset(viewsets.ModelViewSet):
-    http_method_names = ["get"]
+    http_method_names = ["get", "post"]
     
     def get_serializer_class(self):
         path = self.request.path
@@ -43,13 +44,29 @@ class NotificationsViewset(viewsets.ModelViewSet):
                 default=False, output_field=BooleanField()
             )
         ).order_by('-created_at')
-        
-    @action(detail=False, methods=["POST"], http_method_names=["post"], url_path="mark-as-read")
+    
+    @swagger_auto_schema(
+        request_body=None,
+        responses={
+            202: "No need to use this endpoint.",
+        }
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+    
+    @swagger_auto_schema(
+        request_body=NotificationReadCustomSerializer,
+        responses={
+            200: "Notification marked as read.",
+            404: "Notification does not exist and cannot be marked as read."
+        }
+    )
+    @action(detail=False, methods=["POST"], permission_classes=[IsAdmin], serializer_class=NotificationReadCustomSerializer, url_path="mark-as-read")
     def mark_notification_as_read(self, request):
         data = request.data
         user = request.instance
         
-        serializer = NotificationReadCustomSerializer(data=data)
+        serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
         
