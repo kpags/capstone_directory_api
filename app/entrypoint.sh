@@ -7,11 +7,15 @@ set -o pipefail
 # Exit if trying to use an uninitialized variable.
 set -o nounset
 
-python manage.py makemigrations
-python manage.py migrate
-python manage.py create_default_django_superuser
-python manage.py create_default_user
-python manage.py create_default_admin
-python manage.py collectstatic --no-input --clear
+CONTAINER_NAME=${CONTAINER_NAME:-"none"}
+
+if [ "$CONTAINER_NAME" == "web" ]; then
+    python manage.py makemigrations
+    python manage.py migrate
+    python manage.py create_default_django_superuser
+    python manage.py create_default_user
+    python manage.py create_default_admin
+    python manage.py collectstatic --no-input --clear
+fi
 
 exec "$@"

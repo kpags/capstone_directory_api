@@ -95,7 +95,7 @@ TEMPLATES = [
         # https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-TEMPLATES-BACKEND
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         # https://docs.djangoproject.com/en/dev/ref/settings/#dirs
-        "DIRS": [str(BASE_DIR / "templates")],
+        "DIRS": [str(BASE_DIR / "templates"), str(BASE_DIR / "templates/email")],
         # https://docs.djangoproject.com/en/dev/ref/settings/#app-dirs
         "APP_DIRS": True,
         "OPTIONS": {
@@ -224,3 +224,13 @@ CORS_URLS_REGEX = r"^/api/.*$"
 CORS_ORIGIN_ALLOW_ALL = True
 
 ALLOWED_HOSTS = ["*"]
+
+EMAIL_BACKEND = env(
+    "DJANGO_EMAIL_BACKEND",
+    default="django.core.mail.backends.smtp.EmailBackend",
+)
+EMAIL_HOST = env("DJANGO_EMAIL_HOST", default="smtp.gmail.com")
+EMAIL_PORT = env("DJANGO_EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("DJANGO_EMAIL_USER", default="cicscapstone@gmail.com")
+EMAIL_HOST_PASSWORD = env("DJANGO_EMAIL_PASSWORD")
+EMAIL_USE_TLS = True

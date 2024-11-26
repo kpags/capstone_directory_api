@@ -13,7 +13,6 @@ class JWTAuthentication(BaseAuthentication):
         auth_header = request.META.get("HTTP_AUTHORIZATION", "").split()
         if len(auth_header) == 2 and auth_header[0].lower() == "bearer":
             token = auth_header[1]
-            print("Token:", token)
             payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
 
             user_id = payload["id"]
