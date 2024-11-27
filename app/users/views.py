@@ -312,6 +312,10 @@ class UsersViewset(viewsets.ModelViewSet):
         
         if role.lower() in ["admin", "administrator"]:
             return Users.objects.order_by("last_name")
+        elif role.lower() == "faculty":
+            return Users.objects.filter(role="student")
+        elif role.lower() in ["coordinator", "capstone coordinator"]:
+            return Users.objects.filter(role__in=["student", "faculty"])
         else:
             return Users.objects.filter(id=user.id)
         
