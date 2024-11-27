@@ -29,6 +29,18 @@ def is_value_null_or_blank_return_boolean(value, disregard_zeroes_for_numbers=Fa
 
         return len(new_list) == 0
 
+def reset_password_validator_throws_exception(new_password, confirm_password):
+    if new_password != confirm_password:
+        raise ValidationError({"message": "Passwords do not match."})
+    
+    password_validator_throws_exception(
+        password=confirm_password, 
+        has_capital_letter_checker=True, 
+        has_digit_checker=True, 
+        has_special_char_checker=True
+    )
+    
+    
 
 def password_validator_throws_exception(
     password,

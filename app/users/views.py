@@ -10,15 +10,15 @@ from .serializers import (
     UsersSerializer,
     EmailAndPasswordSerializer,
     ChangeCurrentPasswordSerializer,
-    UserProfileSerializer,
     CapstoneGroupsSerializer,
     CSVFileSerializer,
-    EmailSerializer
+    EmailSerializer,
+    ResetPasswordSerializer
 )
 from rest_framework_simplejwt.tokens import RefreshToken
 from utils.auth import encode_tokens
 from utils.permissions import IsActive, IsAdmin, IsAdminOrReadOnly, IsAdminOrCoordinator
-from utils.validations import password_validator_throws_exception
+from utils.validations import password_validator_throws_exception, reset_password_validator_throws_exception
 from django.contrib.auth.hashers import (
     check_password,
 )
@@ -80,7 +80,7 @@ class MeAPIView(APIView):
             if user.group:
                 data["group"] = {
                     "id": user.group.id,
-                    "number": user.group.number,
+                    "number": user.group.name,
                     "academic_year": user.group.academic_year,
                     "course_spec": f"{user.group.course} - {user.group.specialization}",
                 }
@@ -197,6 +197,47 @@ class ForgotPasswordAPIView(APIView):
         
         user.token = token
         user.save()
+
+class ResetPasswordAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
+    serializer_class = ResetPasswordSerializer
+    
+    @swagger_auto_schema(
+        request_body=ResetPasswordSerializer,
+        responses={
+            200: "Password reset successfully.",
+            404: "User with token #### does not exists for password reset."
+        }
+    )
+    def post(self, request):
+        data = request.data
+        
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        
+        token = serializer.validated_data["token"]
+        new_password = serializer.validated_data["new_password"]
+        confirm_password = serializer.validated_data["confirm_password"]
+        
+        reset_password_validator_throws_exception(new_password=new_password, confirm_password=confirm_password)
+        
+        try:
+            existing_user_with_token = Users.objects.get(token=token)
+            existing_user_with_token.password=confirm_password
+            existing_user_with_token.token = None
+            existing_user_with_token._is_notif = False
+            existing_user_with_token.save()
+            
+            return Response({
+                "message": "Password reset successfully."
+            }, status=status.HTTP_200_OK)
+        except Users.DoesNotExist:
+            return Response(
+                {"message": f"User with token {token} does not exists for password reset."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        
         
 
 class ChangeCurrentPasswordAPIView(APIView):
@@ -372,22 +413,23 @@ class UsersViewset(viewsets.ModelViewSet):
             "message": message
         }, status=status.HTTP_200_OK)
 
-@swagger_auto_schema()
-class UserProfileViewset(viewsets.ModelViewSet):
-    queryset = UserProfile.objects.order_by("user__last_name")
-    serializer_class = UserProfileSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter]
-    search_fields = ["user__first_name", "user__last_name", "user__email"]
+# NOT YET NEEDED
+# class UserProfileViewset(viewsets.ModelViewSet):
+#     queryset = UserProfile.objects.order_by("user__last_name")
+#     serializer_class = UserProfileSerializer
+#     filter_backends = [DjangoFilterBackend, SearchFilter]
+#     search_fields = ["user__first_name", "user__last_name", "user__email"]
     
-    def get_queryset(self):
-        user = self.request.instance
-        role = user.role
+#     def get_queryset(self):
+#         user = self.request.instance
+#         role = user.role
         
-        if role.lower() in ["admin", "administrator"]:
-            return UserProfile.objects.order_by("user__last_name").select_related("user")
-        else:
-            return UserProfile.objects.filter(user=user)
-        
+#         if role.lower() in ["admin", "administrator"]:
+#             return UserProfile.objects.order_by("user__last_name").select_related("user")
+#         else:
+#             return UserProfile.objects.filter(user=user)
+   
+@swagger_auto_schema()     
 class CapstoneGroupsViewset(viewsets.ModelViewSet):
     queryset = CapstoneGroups.objects.order_by("created_at")
     permission_classes = [IsAdminOrCoordinator]

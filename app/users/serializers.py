@@ -12,6 +12,11 @@ class EmailAndPasswordSerializer(serializers.Serializer):
 class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
+class ResetPasswordSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    new_password = serializers.CharField()
+    confirm_password = serializers.CharField()
+    
 class ChangeCurrentPasswordSerializer(serializers.Serializer):
     current_password = serializers.CharField()
     new_password = serializers.CharField()

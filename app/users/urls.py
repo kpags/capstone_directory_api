@@ -2,7 +2,15 @@ from django.urls import path, include
 
 from . import views
 from rest_framework.routers import DefaultRouter
-from .views import UsersViewset, CapstoneGroupsViewset, LoginAPIView, ChangeCurrentPasswordAPIView, MeAPIView, ForgotPasswordAPIView
+from .views import (
+    UsersViewset, 
+    CapstoneGroupsViewset, 
+    LoginAPIView, 
+    ChangeCurrentPasswordAPIView, 
+    MeAPIView, 
+    ForgotPasswordAPIView, 
+    ResetPasswordAPIView
+)
 
 app_name = "users"
 
@@ -20,8 +28,13 @@ urlpatterns = [
         name="change-password",
     ),
     path(
-        "reset-password/",
+        "forgot-password/",
         views.ForgotPasswordAPIView.as_view(),
+        name="forgot-password",
+    ),
+    path(
+        "reset-password/",
+        views.ResetPasswordAPIView.as_view(),
         name="reset-password",
     ),
     path("", include(router.urls)),
