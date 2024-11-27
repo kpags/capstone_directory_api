@@ -11,7 +11,7 @@ def create_notification(sender, instance: Users, **kwargs):
     full_name = f"{instance.first_name} {instance.last_name}"
     
     if group:
-        action = f"{full_name} has been added to Group#{group.number} of {group.course} - {group.specialization}."
+        action = f"{full_name} has been added to Group#{group.name} of {group.course} - {group.specialization}."
         
         Notifications.objects.create(
             to_group=group,

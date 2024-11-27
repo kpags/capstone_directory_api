@@ -103,7 +103,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         serialized_data["keywords"] = keywords
         serialized_data["acm_paper"] = acm_file_url
         
-        create_activity_log(actor=user, action=f"Uploaded capstone project '{project.title}' by Group#{project.capstone_group.number} of {project.capstone_group.course}.")
+        create_activity_log(actor=user, action=f"Uploaded capstone project '{project.title}' by Group#{project.capstone_group.name} of {project.capstone_group.course}.")
         return Response(serialized_data, status=status.HTTP_201_CREATED)
     
     @swagger_auto_schema(
@@ -121,7 +121,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
                 "message": "Only administrators can delete capstone projects."
             }, status=status.HTTP_401_UNAUTHORIZED)
             
-        create_activity_log(actor=user, action=f"Deleted capstone project '{project.title}' by Group#{project.capstone_group.number} of {project.capstone_group.course}.")
+        create_activity_log(actor=user, action=f"Deleted capstone project '{project.title}' by Group#{project.capstone_group.name} of {project.capstone_group.course}.")
         return super().destroy(request, *args, **kwargs)
     
     @swagger_auto_schema(
@@ -155,7 +155,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
                 "message": "Only administrators can update the details capstone projects."
             }, status=status.HTTP_401_UNAUTHORIZED)
             
-        create_activity_log(actor=user, action=f"Deleted capstone project '{project.title}' by Group#{project.capstone_group.number} of {project.capstone_group.course}.")
+        create_activity_log(actor=user, action=f"Deleted capstone project '{project.title}' by Group#{project.capstone_group.name} of {project.capstone_group.course}.")
         return super().update(request, *args, **kwargs)
     
     @swagger_auto_schema(
@@ -194,7 +194,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
             else:
                 approve_word = "Rejected"
             
-            create_activity_log(actor=user, action=f"{approve_word} the capstone project '{existing_project.title}' by Group#{existing_project.capstone_group.number} of {existing_project.capstone_group.course}.")
+            create_activity_log(actor=user, action=f"{approve_word} the capstone project '{existing_project.title}' by Group#{existing_project.capstone_group.name} of {existing_project.capstone_group.course}.")
             return Response({
                 "message": f"Capstone project with ID '{project_id}' has been {approve_word.lower()} by {user.get_full_name}."
             }, status=status.HTTP_200_OK)
@@ -239,7 +239,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
             else:
                 best_project_word = "Removed"
             
-            create_activity_log(actor=user, action=f"{best_project_word} the capstone project '{existing_project.title}' by Group#{existing_project.capstone_group.number} of {existing_project.capstone_group.course} as best project.")
+            create_activity_log(actor=user, action=f"{best_project_word} the capstone project '{existing_project.title}' by Group#{existing_project.capstone_group.name} of {existing_project.capstone_group.course} as best project.")
             return Response({
                 "message": f"Capstone project with ID '{project_id}' has been {best_project_word.lower()} as best project by {user.get_full_name}."
             }, status=status.HTTP_200_OK)

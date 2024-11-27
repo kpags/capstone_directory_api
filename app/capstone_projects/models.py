@@ -24,7 +24,7 @@ class CapstoneProjects(models.Model):
     is_approved = models.BooleanField(default=False)
     
     def __str__(self):
-        return f"{self.title} - Group {self.capstone_group.number} of {self.capstone_group.academic_year}"
+        return f"{self.title} - Group {self.capstone_group.name} of {self.capstone_group.academic_year}"
     
     def save(self, *args, **kwargs):
         if self.status:

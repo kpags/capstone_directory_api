@@ -10,13 +10,13 @@ class CapstoneGroups(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    number = models.CharField()
+    name = models.CharField()
     academic_year = models.CharField(max_length=255)
     course = models.CharField(null=True, blank=True)
     specialization = models.CharField(null=True, blank=True)
 
     def __str__(self):
-        return f"Group #{self.number} of S.Y {self.academic_year}"
+        return f"Group #{self.name} of S.Y {self.academic_year}"
 
     
 class Users(models.Model):
@@ -105,4 +105,4 @@ class TechnicalAdvisorGroups(models.Model):
     group = models.ForeignKey(CapstoneGroups, on_delete=models.CASCADE)
     
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name} - Group {self.group.number} of {self.group.academic_year}"
+        return f"{self.user.first_name} {self.user.last_name} - Group {self.group.name} of {self.group.academic_year}"

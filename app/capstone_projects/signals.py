@@ -17,7 +17,7 @@ def create_notification(sender, instance: CapstoneProjects, **kwargs):
         else:
             approval_status = "REJECTED"
             
-        action = f"{instance.title} by Group#{group.number} of {group.course} - {group.specialization} has been {approval_status.upper()}."
+        action = f"{instance.title} by Group#{group.name} of {group.course} - {group.specialization} has been {approval_status.upper()}."
         
         Notifications.objects.create(
             to_group=group,
@@ -33,7 +33,7 @@ def create_notification(sender, instance: CapstoneProjects, **kwargs):
         else:
             best_project_status = "removed"
             
-        action = f"{instance.title} by Group#{group.number} of {group.course} - {group.specialization} has been {best_project_status} as best project."
+        action = f"{instance.title} by Group#{group.name} of {group.course} - {group.specialization} has been {best_project_status} as best project."
         
         Notifications.objects.create(
             to_group=group,
