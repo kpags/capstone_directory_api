@@ -39,7 +39,7 @@ class Users(models.Model):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
-        related_name="capstone_group",
+        related_name="group_members",
     )
     is_active = models.BooleanField(default=True)
     token=models.TextField(null=True, blank=True)

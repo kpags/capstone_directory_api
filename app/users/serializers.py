@@ -22,6 +22,12 @@ class ChangeCurrentPasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField()
 
 
+class UsersCustomSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    email = serializers.EmailField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
@@ -43,6 +49,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         depth = 1
         
 class CapstoneGroupsSerializer(serializers.ModelSerializer):
+    group_members = UsersCustomSerializer(many=True)    
+    
     class Meta:
         model = CapstoneGroups
-        fields = "__all__"
+        fields = ["id", "created_at", "updated_at", "name", "academic_year", "course", "specialization", "group_members"]

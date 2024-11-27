@@ -33,7 +33,6 @@ from django.template.loader import render_to_string
 from django.conf import settings
 import os, random, string
 
-
 # Create your views here.
 class MeAPIView(APIView):
     permission_classes = [IsActive]
@@ -291,7 +290,6 @@ class ChangeCurrentPasswordAPIView(APIView):
 
 @swagger_auto_schema()
 class UsersViewset(viewsets.ModelViewSet):
-    queryset = Users.objects.order_by("last_name")
     serializer_class = UsersSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ["first_name", "last_name", "email"]
@@ -435,7 +433,14 @@ class UsersViewset(viewsets.ModelViewSet):
    
 @swagger_auto_schema()     
 class CapstoneGroupsViewset(viewsets.ModelViewSet):
-    queryset = CapstoneGroups.objects.order_by("created_at")
     permission_classes = [IsAdminOrCoordinator]
     serializer_class = CapstoneGroupsSerializer
     pagination_class = None
+    
+    def get_queryset(self):
+        queryset = CapstoneGroups.objects.order_by("created_at")\
+            .prefetch_related("group_members") \
+        
+        return queryset
+        
+        
