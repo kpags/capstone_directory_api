@@ -434,3 +434,4 @@ class CapstoneGroupsViewset(viewsets.ModelViewSet):
     queryset = CapstoneGroups.objects.order_by("created_at")
     permission_classes = [IsAdminOrCoordinator]
     serializer_class = CapstoneGroupsSerializer
+    pagination_class = None
