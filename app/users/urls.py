@@ -20,9 +20,9 @@ urlpatterns = [
         name="change-password",
     ),
     path(
-        "forgot-password/",
+        "reset-password/",
         views.ForgotPasswordAPIView.as_view(),
-        name="forgot-password",
+        name="reset-password",
     ),
     path("", include(router.urls)),
 ]

@@ -12,7 +12,8 @@ from .serializers import (
     ChangeCurrentPasswordSerializer,
     UserProfileSerializer,
     CapstoneGroupsSerializer,
-    CSVFileSerializer
+    CSVFileSerializer,
+    EmailSerializer
 )
 from rest_framework_simplejwt.tokens import RefreshToken
 from utils.auth import encode_tokens
@@ -30,6 +31,7 @@ from drf_yasg import openapi
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
+import os, random, string
 
 
 # Create your views here.
@@ -141,13 +143,12 @@ class LoginAPIView(APIView):
 class ForgotPasswordAPIView(APIView):
     authentication_classes = []
     permission_classes = []
-    serializer_classes = EmailAndPasswordSerializer
+    serializer_class = EmailSerializer
     
     @swagger_auto_schema(
-        request_body=EmailAndPasswordSerializer,
+        request_body=EmailSerializer,
         responses={
-            200: "Password successfully changed.",
-            400: "User is not active.",
+            200: "Password reset link sent successfully.",
             404: "Email is not yet a registered user."
         }
     )
@@ -155,11 +156,9 @@ class ForgotPasswordAPIView(APIView):
         data = request.data
         
         serializer = self.serializer_class(data=data)
-        serializer.is_valid(raise_exceptions=True)
-        valdiated_data = serializer.validated_data
+        serializer.is_valid(raise_exception=True)
         
-        email = valdiated_data["email"]
-        password = valdiated_data["password"]
+        email = serializer.validated_data["email"]
         
         existing_user = Users.objects.filter(email=email)
         
@@ -170,19 +169,34 @@ class ForgotPasswordAPIView(APIView):
             )
         
         user = existing_user.first()
-        
-        if not user.is_active:
-            return Response(
-                {"message": "User is not active."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-            
-        user.password = password
-        user.save()
+        self.send_reset_password_link(user=user)
         
         return Response({
-            "message": "Password successfully changed.",
+            "message": "Password reset link sent successfully."
         }, status=status.HTTP_200_OK)
+        
+    def send_reset_password_link(self, user: Users):
+        token = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        
+        context = {
+            "name": user.get_full_name,
+            "link": f"{os.getenv('FRONTEND_HOST_URL')}/reset-password/?token={token}"
+        }
+        
+        email_html_message = render_to_string("email/reset_password.html", context)
+        
+        send_mail(
+            subject="Capstone Directory Reset Password",
+            message="",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[user.email],
+            html_message=email_html_message,
+            auth_user=settings.EMAIL_HOST_USER,
+            auth_password=settings.EMAIL_HOST_PASSWORD,
+        )
+        
+        user.token = token
+        user.save()
         
 
 class ChangeCurrentPasswordAPIView(APIView):

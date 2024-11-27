@@ -42,6 +42,7 @@ class Users(models.Model):
         related_name="capstone_group",
     )
     is_active = models.BooleanField(default=True)
+    token=models.TextField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.first_name = self.first_name.title()
