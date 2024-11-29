@@ -9,13 +9,20 @@ set -o nounset
 
 CONTAINER_NAME=${CONTAINER_NAME:-"none"}
 
-if [ "$CONTAINER_NAME" == "web" ]; then
-    python manage.py makemigrations
-    python manage.py migrate
-    python manage.py create_default_django_superuser
-    python manage.py create_default_user
-    python manage.py create_default_admin
-    python manage.py collectstatic --no-input --clear
-fi
+# if [ "$CONTAINER_NAME" == "web" ]; then
+#     python manage.py makemigrations
+#     python manage.py migrate
+#     python manage.py create_default_django_superuser
+#     python manage.py create_default_user
+#     python manage.py create_default_admin
+#     python manage.py collectstatic --no-input --clear
+# fi
+
+python manage.py makemigrations
+python manage.py migrate
+python manage.py create_default_django_superuser
+python manage.py create_default_user
+python manage.py create_default_admin
+python manage.py collectstatic --no-input --clear
 
 exec "$@"
