@@ -15,9 +15,6 @@ class IsActive(BasePermission):
         else:
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
-            
-            if not hasattr(payload, 'instance'):
-                return False
 
             user = payload.get("instance", None)
             return bool(user.is_active)
@@ -34,9 +31,6 @@ class IsAdminOrReadOnly(BasePermission):
         else:
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
-
-            if not hasattr(payload, 'instance'):
-                return False
             
             user = payload.get("instance", None)
             return bool(user.role.lower() in ["admin", "administrator"])
@@ -57,9 +51,6 @@ class IsAdmin(BasePermission):
         else:
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
-            
-            if not hasattr(payload, 'instance'):
-                return False
 
             user = payload.get("instance", None)
             return bool(
@@ -86,9 +77,6 @@ class IsCoordinator(BasePermission):
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
 
-            if not hasattr(payload, 'instance'):
-                return False
-            
             user = payload.get("instance", None)
             return bool(
                 user.is_active
@@ -112,9 +100,6 @@ class IsAdminOrCoordinator(BasePermission):
         else:
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
-
-            if not hasattr(payload, 'instance'):
-                return False
             
             user = payload.get("instance", None)
             return bool(
@@ -137,9 +122,6 @@ class IsFaculty(BasePermission):
         else:
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
-
-            if not hasattr(payload, 'instance'):
-                return False
             
             user = payload.get("instance", None)
             return bool(user.is_active and user.role.lower() in ["faculty"])

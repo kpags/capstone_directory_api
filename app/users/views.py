@@ -20,9 +20,9 @@ from utils.auth import encode_tokens
 from utils.permissions import IsActive, IsAdmin, IsAdminOrReadOnly, IsAdminOrCoordinator
 from utils.validations import password_validator_throws_exception, reset_password_validator_throws_exception
 from django.contrib.auth.hashers import (
-    check_password,
+    check_password, make_password
 )
-from .tasks import upload_users_from_excel
+
 from django.core.cache import cache
 import pandas as pd
 from utils.activity_logs import create_activity_log
@@ -331,25 +331,6 @@ class UsersViewset(viewsets.ModelViewSet):
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-    def send_account_creation_email(self, created_user: Users, plain_text_password):
-        context = {
-            "name": created_user.get_full_name,
-            "email": created_user.email,
-            "password": plain_text_password,
-        }
-        
-        email_html_message = render_to_string("email/account_creation.html", context)
-        
-        send_mail(
-            subject="Capstone Directory Account Creation",
-            message="",
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[created_user.email],
-            html_message=email_html_message,
-            auth_user=settings.EMAIL_HOST_USER,
-            auth_password=settings.EMAIL_HOST_PASSWORD,
-        )
-    
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         user = request.instance 
@@ -388,13 +369,69 @@ class UsersViewset(viewsets.ModelViewSet):
         df = df.fillna('')
         file_data = df.to_dict(orient="records")
         
-        upload_users_from_excel.delay(file_data=file_data)
+        self.upload_users_from_excel(file_data=file_data)
         create_activity_log(actor=user, action="Uploaded an excel file of users.")
         
         return Response({
             "message": f"{str(file)} is being uploaded."
         }, status=status.HTTP_201_CREATED)
+        
+    def upload_users_from_excel(self, file_data):
+        try:
+            users_to_write = []
+            
+            print("Getting data from excel file...")
+            for row in file_data:
+                first_name = row['First Name']
+                last_name = row['Last Name']
+                email = row['Email']
+                password = make_password(f"{first_name}.{last_name}")
+                student_number = row.get('Student Number', None)
+                course = row.get('Course', None)
+                specialization = row.get('Specialization', None)
+                role = row["Role"]
+                
+                created_user = Users(
+                    first_name=first_name.title(),
+                    last_name=last_name.title(),
+                    email=email,
+                    password=password,
+                    role=role.lower(),
+                    course=course,
+                    specialization=specialization,
+                    student_number=student_number
+                )
+                
+                users_to_write.append(created_user)
+                self.send_account_creation_email(created_user=created_user, plain_text_password=f"{first_name}.{last_name}")
+                
+            Users.objects.bulk_create(users_to_write)
+            print("Users created from excel file.")
+                
+            cache.set('users_upload', True, timeout=1800)
+        except Exception as e:
+            print(f"Error occurred while reading Excel file: {str(e)}")
+            pass
     
+    def send_account_creation_email(self, created_user: Users, plain_text_password):
+        context = {
+            "name": created_user.get_full_name,
+            "email": created_user.email,
+            "password": plain_text_password,
+        }
+        
+        email_html_message = render_to_string("email/account_creation.html", context)
+        
+        send_mail(
+            subject="Capstone Directory Account Creation",
+            message="",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[created_user.email],
+            html_message=email_html_message,
+            auth_user=settings.EMAIL_HOST_USER,
+            auth_password=settings.EMAIL_HOST_PASSWORD,
+        )
+        
     @swagger_auto_schema(
         manual_parameters=[],
         responses={

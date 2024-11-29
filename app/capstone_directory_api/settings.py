@@ -211,7 +211,7 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CACHES = {
    "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://172.18.0.2:6379/1",
+        "LOCATION": f"{os.environ.get('REDIS_LOCATION', 'redis://172.18.0.2:6379/1')}/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
