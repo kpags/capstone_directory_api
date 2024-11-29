@@ -18,7 +18,7 @@ class CapstoneProjectsSerializer(serializers.ModelSerializer):
             self.fields.pop('is_approved', None)
         
 class CapstoneProjectsCustomSerializer(serializers.Serializer):
-    capstone_group_id = serializers.CharField() # get UUID of the group
+    capstone_group_id = serializers.CharField(required=False) # get UUID of the group. Not required if project is from alumni
     title = serializers.CharField()
     ip_regristration = serializers.CharField(required=False)
     acm_paper = serializers.FileField(required=False)
