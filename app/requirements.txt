@@ -17,15 +17,12 @@ django-coverage-plugin==3.1.0  # https://github.com/nedbat/django_coverage_plugi
 django-cryptography==1.1 # https://django-cryptography.readthedocs.io/en/latest/
 drf-yasg==1.21.8 #https://pypi.org/project/drf-yasg/
 pytest-django==4.5.2  # https://github.com/pytest-dev/pytest-django
-certifi==2023.7.22
 gspread==5.12.0 # https://github.com/burnash/gspread
 pandas==2.1.2 # https://github.com/pandas-dev/pandas
 nltk==3.8.1 # https://pypi.org/project/nltk/
-python-dotenv==1.0.0
 gunicorn==21.2.0  # https://github.com/benoitc/gunicorn
 pypdf==5.1.0
 psycopg[binary]==3.1.9  # https://github.com/psycopg/psycopg
-psycopg[c]==3.1.9  # https://github.com/psycopg/psycopg
 certifi==2023.7.22
 # for unit testing
 model-bakery==1.17.0 # https://model-bakery.readthedocs.io/en/1.17.0/

@@ -7,11 +7,17 @@ class IsActive(BasePermission):
         method = request.method
 
         if method == "GET":
+            if not hasattr(request, "instance"):
+                return False
+            
             user = request.instance
             return bool(user.is_active)
         else:
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
+            
+            if not hasattr(payload, 'instance'):
+                return False
 
             user = payload.get("instance", None)
             return bool(user.is_active)
@@ -21,11 +27,17 @@ class IsAdminOrReadOnly(BasePermission):
         method = request.method
 
         if method == "GET":
+            if not hasattr(request, "instance"):
+                return False
+            
             return bool(request.instance and request.instance.is_active)
         else:
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
 
+            if not hasattr(payload, 'instance'):
+                return False
+            
             user = payload.get("instance", None)
             return bool(user.role.lower() in ["admin", "administrator"])
 
@@ -35,12 +47,19 @@ class IsAdmin(BasePermission):
 
         if method == "GET":
             user = request.instance
+            
+            if not hasattr(request, "instance"):
+                return False
+            
             return bool(
                 user.is_active and user.role.lower() in ["admin", "administrator"]
             )
         else:
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
+            
+            if not hasattr(payload, 'instance'):
+                return False
 
             user = payload.get("instance", None)
             return bool(
@@ -55,6 +74,10 @@ class IsCoordinator(BasePermission):
 
         if method == "GET":
             user = request.instance
+            
+            if not hasattr(request, "instance"):
+                return False
+            
             return bool(
                 user.is_active
                 and user.role.lower() in ["coordinator", "capstone coordinator"]
@@ -63,6 +86,9 @@ class IsCoordinator(BasePermission):
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
 
+            if not hasattr(payload, 'instance'):
+                return False
+            
             user = payload.get("instance", None)
             return bool(
                 user.is_active
@@ -75,6 +101,10 @@ class IsAdminOrCoordinator(BasePermission):
 
         if method == "GET":
             user = request.instance
+            
+            if not hasattr(request, "instance"):
+                return False
+            
             return bool(
                 user.is_active
                 and user.role.lower() in ["coordinator", "capstone coordinator", "admin", "administrator"]
@@ -83,6 +113,9 @@ class IsAdminOrCoordinator(BasePermission):
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
 
+            if not hasattr(payload, 'instance'):
+                return False
+            
             user = payload.get("instance", None)
             return bool(
                 user.is_active
@@ -96,10 +129,17 @@ class IsFaculty(BasePermission):
 
         if method == "GET":
             user = request.instance
+            
+            if not hasattr(request, "instance"):
+                return False
+            
             return bool(user.is_active and user.role.lower() in ["faculty"])
         else:
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
 
+            if not hasattr(payload, 'instance'):
+                return False
+            
             user = payload.get("instance", None)
             return bool(user.is_active and user.role.lower() in ["faculty"])
