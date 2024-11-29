@@ -43,8 +43,6 @@ DEBUG = env.bool("DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = ["*"]
 
-print("CHECKING ENV:", env("ENVIRONMENT", default="NO ENVIRONMENT"))
-
 # Application definition
 DJANGO_APPS = [
     "django.contrib.admin",
@@ -134,6 +132,9 @@ DATABASES = {
         default="postgres:///capstone_directory_api",
     ),
 }
+
+print("CHECKING DB URL:", env("DATABASE_URL", default="NO DB URL"))
+print("CHECKING DB:", DATABASES)
 
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # Password validation
