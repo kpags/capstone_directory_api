@@ -92,13 +92,17 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         cloudinary_response = upload_to_cloudinary(file=binary_acm_form_file)
         acm_file_url = cloudinary_response.get("url", None)
         
-        project = CapstoneProjects.objects.create(
+        project = CapstoneProjects(
             capstone_group=group,
             keywords=keywords,
             acm_paper=acm_file_url,
             **validated_data
         )
         
+        if user.role.lower() in ['admin', 'administrator']:
+            project.is_approved = True
+        
+        project.save()
         serialized_data = serializer.data
         serialized_data["keywords"] = keywords
         serialized_data["acm_paper"] = acm_file_url
