@@ -221,7 +221,7 @@ CACHES = {
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 CORS_URLS_REGEX = r"^/api/.*$"
 CORS_ORIGIN_ALLOW_ALL = True
-CSRF_TRUSTED_ORIGINS = ["https://capstonedirectoryapi-api-environment.up.railway.app"]
+CSRF_TRUSTED_ORIGINS = ["https://capstonedirectoryapi-api-environment.up.railway.app", "https://capstone-directory-api-api-environment.up.railway.app"]
 ALLOWED_HOSTS = ["*"]
 
 EMAIL_BACKEND = env(
