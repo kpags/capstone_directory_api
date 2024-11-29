@@ -114,11 +114,22 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     "default": env.db(
+#         "DATABASE_URL",
+#         default="postgres:///capstone_directory_api",
+#     ),
+# }
+
 DATABASES = {
-    "default": env.db(
-        "DATABASE_URL",
-        default="postgres:///capstone_directory_api",
-    ),
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "postgres",
+        "USER": "capstone",
+        "PASSWORD": "!Qaz2wsxcapstone",
+        "HOST": "postgres",  # This should match your docker-compose network
+        "PORT": 5432,
+    }
 }
 
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
