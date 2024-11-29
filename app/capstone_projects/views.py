@@ -77,16 +77,22 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         
         acm_file = validated_data.pop("acm_paper", None)
         keywords = generate_pdf_keywords(file=acm_file)
+        capstone_group_id = validated_data.get("capstone_group_id", None)
+        group = None
         
-        group = CapstoneGroups.objects.get(id=data["capstone_group_id"])
-        group_members = Users.objects.filter(group=group)
-        
-        if "members" not in validated_data.keys():
-            members = []
-            for member in group_members:
-                members.append(f"{member.first_name} {member.last_name}")
+        if capstone_group_id:
+            group = CapstoneGroups.objects.filter(id=data["capstone_group_id"])
+            
+            if group:
+                group = group.first()
+                group_members = Users.objects.filter(group=group)
                 
-            validated_data["members"] = members
+                if "members" not in validated_data.keys():
+                    members = []
+                    for member in group_members:
+                        members.append(f"{member.first_name} {member.last_name}")
+                        
+                    validated_data["members"] = members
         
         binary_acm_form_file = request.FILES["acm_paper"]
         cloudinary_response = upload_to_cloudinary(file=binary_acm_form_file)
@@ -107,7 +113,12 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         serialized_data["keywords"] = keywords
         serialized_data["acm_paper"] = acm_file_url
         
-        create_activity_log(actor=user, action=f"Uploaded capstone project '{project.title}' by Group#{project.capstone_group.name} of {project.capstone_group.course}.")
+        if group:
+            action = f"Uploaded capstone project '{project.title}' by Group#{project.capstone_group.name} of {project.capstone_group.course}."
+        else:
+            action = f"Uploaded capstone project '{project.title}' from a former capstone group published in {validated_data.get('date_published', 'Unknown')}."
+            
+        create_activity_log(actor=user, action=action)
         return Response(serialized_data, status=status.HTTP_201_CREATED)
     
     @swagger_auto_schema(
