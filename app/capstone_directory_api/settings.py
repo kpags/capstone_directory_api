@@ -221,7 +221,7 @@ CACHES = {
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 CORS_URLS_REGEX = r"^/api/.*$"
 CORS_ORIGIN_ALLOW_ALL = True
-
+CSRF_TRUSTED_ORIGINS = ["*"]
 ALLOWED_HOSTS = ["*"]
 
 EMAIL_BACKEND = env(
@@ -233,3 +233,12 @@ EMAIL_PORT = env("DJANGO_EMAIL_PORT", default=587)
 EMAIL_HOST_USER = env("DJANGO_EMAIL_USER", default="cicscapstone@gmail.com")
 EMAIL_HOST_PASSWORD = env("DJANGO_EMAIL_PASSWORD")
 EMAIL_USE_TLS = True
+
+# SECURITY
+# ------------------------------------------------------------------------------
+# https://docs.djangoproject.com/en/dev/ref/settings/#session-cookie-httponly
+SESSION_COOKIE_HTTPONLY = True
+# https://docs.djangoproject.com/en/dev/ref/settings/#csrf-cookie-httponly
+CSRF_COOKIE_HTTPONLY = True
+# https://docs.djangoproject.com/en/dev/ref/settings/#x-frame-options
+X_FRAME_OPTIONS = "DENY"
