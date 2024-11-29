@@ -18,6 +18,8 @@ services:
       - postgres
     expose:
       - 8000
+    networks:
+      - capstone_network
 
   postgres:
     container_name: postgres_capstone
@@ -32,11 +34,15 @@ services:
     restart: always
     expose:
       - 5432
-    
+    networks:
+      - capstone_network
+
   redis:
     container_name: redis_capstone
     image: redis:7-alpine
     restart: always
+    networks:
+      - capstone_network
 
   celery_worker:
     container_name: celery_worker_1
@@ -53,6 +59,8 @@ services:
       - redis
       - postgres
       - web
+    networks:
+      - capstone_network
 
   celery_beat:
     container_name: celery_beat_1
@@ -69,6 +77,12 @@ services:
       - redis
       - postgres
       - web
+    networks:
+      - capstone_network
+
+networks:
+  capstone_network:
+    driver: bridge
 
 volumes:
   static_volume:
