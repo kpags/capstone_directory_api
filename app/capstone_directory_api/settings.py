@@ -43,6 +43,8 @@ DEBUG = env.bool("DJANGO_DEBUG", False)
 
 ALLOWED_HOSTS = ["*"]
 
+print("CHECKING ENV:", env("ENVIRONMENT", default="NO ENVIRONMENT"))
+
 # Application definition
 DJANGO_APPS = [
     "django.contrib.admin",
