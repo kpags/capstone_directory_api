@@ -27,7 +27,7 @@ services:
     volumes:
       - capstone_directory_api_local_postgres_data:/var/lib/postgresql/data
       - capstone_directory_api_local_postgres_data_backups:/backups
-    env_file:
+    environment:
       - ./app/.env
     restart: always
     expose:
