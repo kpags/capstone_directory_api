@@ -20,7 +20,7 @@ class CapstoneProjectsSerializer(serializers.ModelSerializer):
 class CapstoneProjectsCustomSerializer(serializers.Serializer):
     capstone_group_id = serializers.CharField(required=False) # get UUID of the group. Not required if project is from alumni
     title = serializers.CharField()
-    ip_regristration = serializers.CharField(required=False)
+    ip_registration = serializers.CharField(required=False)
     acm_paper = serializers.FileField(required=False)
     full_document = serializers.CharField(required=False)
     pubmat = serializers.CharField(required=False)
