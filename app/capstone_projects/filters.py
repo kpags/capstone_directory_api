@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-
+from django.db.models import Q
 from .models import CapstoneProjects
 
 class CapstoneProjectsFilter(filters.FilterSet):
@@ -8,10 +8,11 @@ class CapstoneProjectsFilter(filters.FilterSet):
     status = filters.CharFilter(field_name="status", lookup_expr="iexact")
     keywords = filters.CharFilter(method="filter_by_keywords")
     sort_by = filters.CharFilter(method="filter_by_sort_type")
+    is_ip_registered = filters.CharFilter(method="filter_by_is_ip_registered")
     
     class Meta:
         model = CapstoneProjects
-        fields = ['keywords', 'status', 'is_approved', 'is_best_project', 'sort_by']
+        fields = ['keywords', 'status', 'is_approved', 'is_best_project', 'sort_by', 'is_ip_registered']
         
     def filter_by_keywords(self, queryset, name, value):
         array_values = value.split(",")
@@ -27,5 +28,13 @@ class CapstoneProjectsFilter(filters.FilterSet):
             return queryset.order_by('title')
         elif value.lower() == "alphabetical_desc":
             return queryset.order_by('-title')
+        else:
+            return queryset
+        
+    def filter_by_is_ip_registered(self, queryset, name, value):
+        if value.lower() == "true" or value == True:
+            return queryset.exclude(ip_registration=None).exclude(ip_registration="")
+        elif value.lower() == "false" or value == False:
+            return queryset.filter(Q(ip_registration=None) | Q(ip_registration=""))
         else:
             return queryset
