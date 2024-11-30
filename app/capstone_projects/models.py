@@ -24,6 +24,9 @@ class CapstoneProjects(models.Model):
     is_approved = models.BooleanField(default=False)
     
     def __str__(self):
+        if self.capstone_group is None:
+            return f"{self.title} published on {self.date_published}"
+        
         return f"{self.title} - Group {self.capstone_group.name} of {self.capstone_group.academic_year}"
     
     def save(self, *args, **kwargs):
