@@ -32,7 +32,7 @@ def generate_pdf_keywords(file):
         
         unique_relevant_words = list(set(relevant_words))
         freq_dist = FreqDist(unique_relevant_words)
-        most_common_words = freq_dist.most_common(10)
+        most_common_words = freq_dist.most_common(100)
 
         for word, frequencies in most_common_words:
             most_used_words.append(
@@ -42,7 +42,7 @@ def generate_pdf_keywords(file):
                 }
             )
         
-    top_10_words = sorted(most_used_words, key=lambda x: x['frequencies'], reverse=True)[:10]
-    top_10_words_list = [entry['word'] for entry in top_10_words]
+    top_100_words = sorted(most_used_words, key=lambda x: x['frequencies'], reverse=True)[:100]
+    top_100_words_list = [entry['word'] for entry in top_100_words]
     
-    return top_10_words_list
+    return top_100_words_list
