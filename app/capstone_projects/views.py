@@ -135,7 +135,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
                 "message": "Only administrators can delete capstone projects."
             }, status=status.HTTP_401_UNAUTHORIZED)
             
-        create_activity_log(actor=user, action=f"Deleted capstone project '{project.title}' by Group#{project.capstone_group.name} of {project.capstone_group.course}.")
+        create_activity_log(actor=user, action=f"Deleted capstone project '{project.title}'.")
         return super().destroy(request, *args, **kwargs)
     
     @swagger_auto_schema(
