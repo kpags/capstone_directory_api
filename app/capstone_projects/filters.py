@@ -13,7 +13,7 @@ class CapstoneProjectsFilter(filters.FilterSet):
     
     class Meta:
         model = CapstoneProjects
-        fields = ['search', 'keywords', 'status', 'is_approved', 'is_best_project', 'sort_by', 'is_ip_registered', 'course']
+        fields = ['search', 'status', 'is_approved', 'is_best_project', 'sort_by', 'is_ip_registered', 'course']
     
     def filter_by_course(self, queryset, name, value):
         return queryset.filter(capstone_group__course__iexact=value)
