@@ -9,13 +9,28 @@ class CapstoneProjectsFilter(filters.FilterSet):
     keywords = filters.CharFilter(method="filter_by_keywords")
     sort_by = filters.CharFilter(method="filter_by_sort_type")
     is_ip_registered = filters.CharFilter(method="filter_by_is_ip_registered")
+    search = filters.CharFilter(method="filter_by_search")
+    course = filters.CharFilter(method="filter_by_course")
     
     class Meta:
         model = CapstoneProjects
-        fields = ['keywords', 'status', 'is_approved', 'is_best_project', 'sort_by', 'is_ip_registered']
+        fields = ['search', 'keywords', 'status', 'is_approved', 'is_best_project', 'sort_by', 'is_ip_registered', 'course']
+    
+    def filter_by_course(self, queryset, name, value):
+        return queryset.filter(capstone_group__course__iexact=value)
+    
+    def filter_by_search(self, queryset, name, value):
+        array_values = value.lower().split(" ")
         
+        return queryset.filter(
+            Q(title__icontains=value) | 
+            Q(capstone_group__name=value) | 
+            Q(capstone_group__academic_year=value) | 
+            Q(keywords__overlap=array_values)
+        )
+            
     def filter_by_keywords(self, queryset, name, value):
-        array_values = value.split(",")
+        array_values = value.lower().split(" ")
         
         return queryset.filter(keywords__overlap=array_values)
     

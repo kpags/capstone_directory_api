@@ -16,6 +16,9 @@ class IsActive(BasePermission):
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
 
+            if payload is None:
+                return False
+            
             user = payload.get("instance", None)
             return bool(user.is_active)
         
@@ -31,6 +34,9 @@ class IsAdminOrReadOnly(BasePermission):
         else:
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
+            
+            if payload is None:
+                return False
             
             user = payload.get("instance", None)
             return bool(user.role.lower() in ["admin", "administrator"])
@@ -51,6 +57,9 @@ class IsAdmin(BasePermission):
         else:
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
+            
+            if payload is None:
+                return False
 
             user = payload.get("instance", None)
             return bool(
@@ -76,6 +85,9 @@ class IsCoordinator(BasePermission):
         else:
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
+            
+            if payload is None:
+                return False
 
             user = payload.get("instance", None)
             return bool(
@@ -101,6 +113,9 @@ class IsAdminOrCoordinator(BasePermission):
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
             
+            if payload is None:
+                return False
+            
             user = payload.get("instance", None)
             return bool(
                 user.is_active
@@ -122,6 +137,9 @@ class IsFaculty(BasePermission):
         else:
             auth = JWTAuthentication()
             payload = auth.authenticate(request=request)
+            
+            if payload is None:
+                return False
             
             user = payload.get("instance", None)
             return bool(user.is_active and user.role.lower() in ["faculty"])
