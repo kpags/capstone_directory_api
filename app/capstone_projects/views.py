@@ -25,7 +25,6 @@ from drf_yasg import openapi
 
 class CapstoneProjectsViewset(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
-    search_fields = ['title', 'capstone_group__number', 'capstone_group__academic_year']
     filterset_class = CapstoneProjectsFilter
     
     def get_serializer_context(self):
