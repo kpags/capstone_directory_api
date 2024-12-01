@@ -136,11 +136,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
             }, status=status.HTTP_401_UNAUTHORIZED)
             
         
-        if project.capstone_group.name is None or project.capstone_group.name == "":
-            create_activity_log(actor=user, action=f"Deleted capstone project '{project.title}'.")
-        else:
-            create_activity_log(actor=user, action=f"Deleted capstone project '{project.title}' by Group#{project.capstone_group.name} of {project.capstone_group.course}.")
-            
+        create_activity_log(actor=user, action=f"Deleted capstone project '{project.title}'.")
         return super().destroy(request, *args, **kwargs)
     
     @swagger_auto_schema(
