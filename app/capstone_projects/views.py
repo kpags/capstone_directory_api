@@ -171,28 +171,25 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
             }, status=status.HTTP_401_UNAUTHORIZED)
             
         capstone_group_id = data.get("capstone_group_id", None)
+        
         serializer = CapstoneProjectsSerializer(data=data, instance=project)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
         
         if not capstone_group_id:
-            raise ValidationError({
-                "message": "Capstone group ID is required."
-            })
-        
-        group = CapstoneGroups.objects.filter(id=data["capstone_group_id"])
-        
-        if group:
-            group = group.first()
-            validated_data["capstone_group"] = group
-            group_members = Users.objects.filter(group=group)
+            group = CapstoneGroups.objects.filter(id=data["capstone_group_id"])
             
-            if "members" not in validated_data.keys():
-                members = []
-                for member in group_members:
-                    members.append(f"{member.first_name} {member.last_name}")
-                    
-                validated_data["members"] = members
+            if group:
+                group = group.first()
+                validated_data["capstone_group"] = group
+                group_members = Users.objects.filter(group=group)
+                
+                if "members" not in validated_data.keys():
+                    members = []
+                    for member in group_members:
+                        members.append(f"{member.first_name} {member.last_name}")
+                        
+                    validated_data["members"] = members
             
         serializer.save()
         serialized_data = serializer.data
