@@ -24,7 +24,7 @@ from drf_yasg import openapi
 # Create your views here.
 
 class CapstoneProjectsViewset(viewsets.ModelViewSet):
-    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filter_backends = [DjangoFilterBackend]
     filterset_class = CapstoneProjectsFilter
     
     def get_serializer_context(self):
