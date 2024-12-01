@@ -176,7 +176,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
         
-        if not capstone_group_id:
+        if capstone_group_id:
             group = CapstoneGroups.objects.filter(id=data["capstone_group_id"])
             
             if group:
