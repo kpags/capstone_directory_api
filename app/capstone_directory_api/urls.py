@@ -13,9 +13,9 @@ ENVIRONMENT = os.environ.get("ENVIRONMENT", "DEV")
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Dropify PH API Documentation",
+        title="Capstone Directory API Documentation",
         default_version="v1",
-        description="API documentation for Dropify PH API",
+        description="API documentation for Capstone Directory API",
     ),
     public=True,
     permission_classes=(IsAdmin,) if ENVIRONMENT == "PROD" else (),
@@ -56,7 +56,7 @@ urlpatterns += [
         r"api/activity-logs/",
         include("activity_logs.urls", namespace="activity_logs"),
     ),
-     re_path(
+    re_path(
         r"api/notifications/",
         include("notifications.urls", namespace="notifications"),
     ),
