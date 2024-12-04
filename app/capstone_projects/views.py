@@ -101,12 +101,13 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         acm_file_url = cloudinary_response.get("url", None)
         
         ip_reg = validated_data.pop("ip_regristration", None)
-        
+        members = validated_data.pop("members", None)
         project = CapstoneProjects(
             capstone_group=group,
             keywords=keywords,
             acm_paper=acm_file_url,
             ip_registration=ip_reg,
+            members=members,
             **validated_data
         )
         
@@ -298,7 +299,14 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
             else:
                 best_project_word = "Removed"
             
-            create_activity_log(actor=user, action=f"{best_project_word} the capstone project '{existing_project.title}' by Group#{existing_project.capstone_group.name} of {existing_project.capstone_group.course} as best project.")
+            has_group = getattr(existing_project, "capstone_group", None)
+            
+            if has_group:
+                action = f"{best_project_word} the capstone project '{existing_project.title}' by Group#{existing_project.capstone_group.name} of {existing_project.capstone_group.course} as best project."
+            else:
+                action = f"{best_project_word} the capstone project '{existing_project.title}' as best project."
+                
+            create_activity_log(actor=user, action=action)
             return Response({
                 "message": f"Capstone project with ID '{project_id}' has been {best_project_word.lower()} as best project by {user.get_full_name}."
             }, status=status.HTTP_200_OK)
