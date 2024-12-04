@@ -253,8 +253,15 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
                 approve_word = "Approved"
             else:
                 approve_word = "Rejected"
+                
+            has_group = getattr(existing_project, "capstone_group", None)
             
-            create_activity_log(actor=user, action=f"{approve_word} the capstone project '{existing_project.title}' by Group#{existing_project.capstone_group.name} of {existing_project.capstone_group.course}.")
+            if has_group and (has_group is not None or has_group != ""):
+                action = f"{approve_word} the capstone project '{existing_project.title}' by Group#{existing_project.capstone_group.name} of {existing_project.capstone_group.course}."
+            else:
+                action = f"{approve_word} the capstone project '{existing_project.title}'."
+                
+            create_activity_log(actor=user, action=action)
             return Response({
                 "message": f"Capstone project with ID '{project_id}' has been {approve_word.lower()} by {user.get_full_name}."
             }, status=status.HTTP_200_OK)
@@ -301,7 +308,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
             
             has_group = getattr(existing_project, "capstone_group", None)
             
-            if has_group:
+            if has_group and (has_group is not None or has_group != ""):
                 action = f"{best_project_word} the capstone project '{existing_project.title}' by Group#{existing_project.capstone_group.name} of {existing_project.capstone_group.course} as best project."
             else:
                 action = f"{best_project_word} the capstone project '{existing_project.title}' as best project."
