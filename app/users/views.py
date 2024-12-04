@@ -324,6 +324,7 @@ class UsersViewset(viewsets.ModelViewSet):
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
+        validated_data["password"] = f"{validated_data['first_name']}.{validated_data['last_name']}"
         created_user = serializer.save()
         
         self.send_account_creation_email(created_user, f"{created_user.first_name}.{created_user.last_name}")

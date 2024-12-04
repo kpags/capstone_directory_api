@@ -9,6 +9,12 @@ class CapstoneProjectsSerializer(serializers.ModelSerializer):
         model = CapstoneProjects
         fields = "__all__"
         depth = 1
+        
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation["acm_paper"] = instance.acm_paper
+        
+        return representation
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
