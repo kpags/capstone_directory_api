@@ -57,7 +57,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         role = user.role.lower()
         
         if role in ["admin", "administrator"]:
-            return CapstoneProjects.objects.order_by('created_at').order_by('-created_at')
+            return CapstoneProjects.objects.order_by('-created_at')
         
         return CapstoneProjects.objects.filter(capstone_group=user.group).order_by('-created_at')
     
@@ -236,8 +236,8 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         validated_data = serializer.validated_data
         
         project_id = validated_data.get('project_id', None)
-        is_approved = validated_data.get('is_approved', False)
-        
+        is_approved = validated_data.get('is_approved', None)
+                
         if not project_id:
             raise ValidationError({
                 "message": "Project ID is required to approve it."

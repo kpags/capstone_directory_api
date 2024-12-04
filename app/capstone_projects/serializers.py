@@ -40,7 +40,7 @@ class CapstoneProjectsCustomSerializer(serializers.Serializer):
 
 class CapstoneProjectApprovalSerializer(serializers.Serializer):
     project_id = serializers.CharField()
-    is_approved = serializers.BooleanField()
+    is_approved = serializers.BooleanField(allow_null=True, required=False)
     
 class CapstoneProjectBestProjectSerializer(serializers.Serializer):
     project_id = serializers.CharField()
