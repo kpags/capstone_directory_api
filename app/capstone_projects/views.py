@@ -97,10 +97,13 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         cloudinary_response = upload_to_cloudinary(file=binary_acm_form_file)
         acm_file_url = cloudinary_response.get("url", None)
         
+        ip_reg = validated_data.pop("ip_regristration", None)
+        
         project = CapstoneProjects(
             capstone_group=group,
             keywords=keywords,
             acm_paper=acm_file_url,
+            ip_registration=ip_reg,
             **validated_data
         )
         
@@ -190,10 +193,23 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
                         members.append(f"{member.first_name} {member.last_name}")
                         
                     validated_data["members"] = members
+                    
+        acm_file = validated_data.pop("acm_paper", None)
+        keywords = generate_pdf_keywords(file=acm_file)
+        capstone_group_id = validated_data.get("capstone_group_id", None)
+        group = None
+        
+        binary_acm_form_file = request.FILES["acm_paper"]
+        cloudinary_response = upload_to_cloudinary(file=binary_acm_form_file)
+        acm_file_url = cloudinary_response.get("url", None)
+        
+        project.keywords = keywords
+        project.acm_paper = acm_file_url
+        for field, value in validated_data.items():
+            setattr(project, field, value)
+        project.save()
             
-        serializer.save()
-        serialized_data = serializer.data
-        serialized_data.pop('keywords', None)
+        serialized_data = CapstoneProjectsSerializer(project).data
         
         create_activity_log(actor=user, action=f"Updated capstone project '{project.title}'.")
         return Response(serialized_data, status=status.HTTP_200_OK)
