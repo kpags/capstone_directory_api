@@ -18,7 +18,8 @@ schema_view = get_schema_view(
         description="API documentation for Capstone Directory API",
     ),
     public=True,
-    permission_classes=(IsAdmin,) if ENVIRONMENT == "PROD" else (),
+    # permission_classes=(IsAdmin,) if ENVIRONMENT == "PROD" else (),
+    permission_classes=(),
 )
 
 urlpatterns = (
