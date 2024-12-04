@@ -21,7 +21,7 @@ class CapstoneProjects(models.Model):
     is_best_project = models.BooleanField(default=False)
     date_published = models.DateField(null=True, blank=True)
     status = models.CharField(null=True, blank=True)
-    is_approved = models.BooleanField(default=False)
+    is_approved = models.BooleanField(null=True, blank=True)
     
     def __str__(self):
         if self.capstone_group is None:
