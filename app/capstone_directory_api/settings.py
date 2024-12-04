@@ -57,6 +57,7 @@ THIRD_PARTY_APPS = [
     "django_filters",
     "debug_toolbar",
     "django_celery_beat",
+    "cloudinary",
 ]
 
 LOCAL_APPS = ["users", "capstone_projects", "activity_logs", "notifications"]
@@ -221,7 +222,6 @@ CACHES = {
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 CORS_URLS_REGEX = r"^/api/.*$"
 CORS_ORIGIN_ALLOW_ALL = True
-CSRF_TRUSTED_ORIGINS = ["https://capstonedirectoryapi-api-environment.up.railway.app", "https://capstone-directory-api-api-environment.up.railway.app"]
 ALLOWED_HOSTS = ["*"]
 
 EMAIL_BACKEND = env(
@@ -242,3 +242,13 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#x-frame-options
 X_FRAME_OPTIONS = "DENY"
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+cloudinary.config(
+    cloud_name=os.getenv('CLOUD_NAME'), 
+    api_key=os.getenv('CLOUDINARY_API_KEY'), 
+    api_secret=os.getenv('CLOUDINARY_API_SECRET')
+)

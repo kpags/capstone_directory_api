@@ -92,6 +92,9 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
                         members.append(f"{member.first_name} {member.last_name}")
                         
                     validated_data["members"] = members
+                    
+        if group is None:
+            group = user.group
         
         binary_acm_form_file = request.FILES["acm_paper"]
         cloudinary_response = upload_to_cloudinary(file=binary_acm_form_file)
