@@ -76,6 +76,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         
         acm_file = validated_data.pop("acm_paper", None)
         keywords = generate_pdf_keywords(file=acm_file)
+        group_members = data.getlist("members[]", [])
         capstone_group_id = validated_data.get("capstone_group_id", None)
         group = None
         
@@ -96,6 +97,9 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         if group is None:
             group = user.group
         
+        if group_members:
+            validated_data["members"] = group_members
+            
         binary_acm_form_file = request.FILES["acm_paper"]
         cloudinary_response = upload_to_cloudinary(file=binary_acm_form_file)
         acm_file_url = cloudinary_response.get("url", None)
