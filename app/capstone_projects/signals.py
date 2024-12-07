@@ -15,7 +15,7 @@ def create_notification(sender, instance: CapstoneProjects, **kwargs):
         if is_approved:
             approval_status = "APPROVED"
         else:
-            approval_status = "REJECTED"
+            approval_status = "REJECTED. The project must've been incomplete."
             
         if group:
             action = f"{instance.title} by Group#{group.name} of {group.course} - {group.specialization} has been {approval_status.upper()}."
