@@ -344,11 +344,20 @@ class UsersViewset(viewsets.ModelViewSet):
         data = request.data
         user = request.instance
         
+        student_number = data.get('student_number')
+        existing_student_number = Users.objects.filter(student_number=student_number)
+        
+        if existing_student_number.exists():
+            return Response({"message": f"Student with student number '{student_number}' already exists."})
+        
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
         validated_data["password"] = f"{validated_data['first_name']}.{validated_data['last_name']}"
-        created_user = serializer.save()
+        
+        created_user = Users(**validated_data)
+        created_user._is_notif = True
+        created_user.save()
         
         self.send_account_creation_email(created_user, f"{created_user.first_name}.{created_user.last_name}")
         create_activity_log(actor=user, action=f"Created user '{validated_data.get('email', 'Anonymous User')}'.")
@@ -358,9 +367,26 @@ class UsersViewset(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         user = request.instance 
+        data = request.data
+        
+        old_group = getattr(instance, 'group', None)
+        
+        serializer = self.serializer_class(data=data, instance=instance, partial=True)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+        
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        
+        new_group = validated_data.get('group', None)
+        
+        if new_group and old_group != new_group:
+            instance._is_notif = True
+        
+        instance.save()
         
         create_activity_log(actor=user, action=f"Updated user '{instance.email}'.")
-        return super().update(request, *args, **kwargs)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def destroy(self, request, *args, **kwargs):
         user = request.instance

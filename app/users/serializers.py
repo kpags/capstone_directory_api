@@ -45,6 +45,10 @@ class UsersSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
 
         http_method = self.context.get("request", None)
+        
+        self.fields.pop("token", None)
+        self.fields.pop("login_failed_attempts", None)
+        self.fields.pop("temporary_disabled_date", None)
 
         if http_method and http_method.lower() in ["put", "patch"]:
             self.fields.pop("email", None)
