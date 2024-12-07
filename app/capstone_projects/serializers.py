@@ -37,6 +37,8 @@ class CapstoneProjectsCustomSerializer(serializers.Serializer):
     members = serializers.ListField(child=serializers.CharField(), allow_empty=True, required=False)
     date_published = serializers.DateField(required=False)
     status = serializers.CharField(required=False)
+    course = serializers.CharField(required=True)
+    specialization = serializers.CharField(required=True)
 
 class CapstoneProjectApprovalSerializer(serializers.Serializer):
     project_id = serializers.CharField()

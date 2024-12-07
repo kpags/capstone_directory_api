@@ -10,13 +10,17 @@ class CapstoneProjectsFilter(filters.FilterSet):
     is_ip_registered = filters.CharFilter(method="filter_by_is_ip_registered")
     search = filters.CharFilter(method="filter_by_search")
     course = filters.CharFilter(method="filter_by_course")
+    specialization = filters.CharFilter(method="filter_by_specialization")
     
     class Meta:
         model = CapstoneProjects
-        fields = ['search', 'status', 'is_approved', 'is_best_project', 'sort_by', 'is_ip_registered', 'course']
+        fields = ['search', 'status', 'is_approved', 'is_best_project', 'sort_by', 'is_ip_registered', 'course', 'specialization']
     
     def filter_by_course(self, queryset, name, value):
-        return queryset.filter(capstone_group__course__iexact=value)
+        return queryset.filter(Q(capstone_group__course__iexact=value) | Q(course__iexact=value))
+    
+    def filter_by_specialization(self, queryset, name, value):
+        return queryset.filter(Q(capstone_group__specialization__iexact=value) | Q(specialization__iexact=value))
     
     def filter_by_search(self, queryset, name, value):
         array_values = value.lower().split(" ")

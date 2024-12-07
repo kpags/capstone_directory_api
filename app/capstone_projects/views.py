@@ -20,6 +20,7 @@ from utils.cloudinary import upload_to_cloudinary
 from utils.activity_logs import create_activity_log
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.db.models import Q
 
 # Create your views here.
 
@@ -220,6 +221,95 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         serialized_data = CapstoneProjectsSerializer(project).data
         
         create_activity_log(actor=user, action=f"Updated capstone project '{project.title}'.")
+        return Response(serialized_data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "is_best_project",
+                openapi.IN_QUERY,
+                description="Filter by best projects or not",
+                type=openapi.TYPE_BOOLEAN,
+                required=False,
+            ),
+            openapi.Parameter(
+                "is_ip_registered",
+                openapi.IN_QUERY,
+                description="Filter by registered ip or not",
+                type=openapi.TYPE_BOOLEAN,
+                required=False,
+            ),
+            openapi.Parameter(
+                "search",
+                openapi.IN_QUERY,
+                description="Search by title, group name, academic year, keywords",
+                type=openapi.TYPE_STRING,
+                required=False,
+            ),
+            openapi.Parameter(
+                "sort_by",
+                openapi.IN_QUERY,
+                description="Sort by newest, oldest, and alphabetical (Ascending/Descending)",
+                type=openapi.TYPE_STRING,
+                required=False,
+            ),
+        ],
+        responses={
+            200: CapstoneProjectsSerializer(many=False),
+        }
+    )
+    @action(detail=False, methods=["GET"], permission_classes=[IsActive], serializer_class=CapstoneProjectsSerializer, filterset_class=[], url_path="all-projects")
+    def get_all_projects_based_on_course(self, request):
+        user = request.instance
+        user_course = user.course
+        user_spec = user.specialization
+        user_role = user.role
+        
+        is_best_project = request.query_params.get('is_best_project', None)
+        is_ip_registered = request.query_params.get('is_ip_registered', None)
+        search = request.query_params.get('search', None)
+        sort_by = request.query_params.get('sort_by', None)
+        
+        if user_role.lower() == "student":
+            queryset = CapstoneProjects.objects.filter(specialization=user_spec)
+        
+        if user_role.lower() in ['faculty', 'coordinator', 'capstone coordinator']:
+            specialization_filter = request.query_params.get('specialization', None)
+            
+            if specialization_filter:
+                queryset = CapstoneProjects.objects.filter(course=user_course, specialization=specialization_filter)
+            else:
+                queryset = CapstoneProjects.objects.filter(course=user_course)
+        
+        if is_best_project:
+            queryset = queryset.filter(is_best_project=True)
+        
+        if is_ip_registered:
+            if is_ip_registered.lower() == "true" or is_ip_registered == True:
+                queryset = queryset.exclude(ip_registration=None).exclude(ip_registration="")
+            elif is_ip_registered.lower() == "false" or is_ip_registered == False:
+                queryset = queryset.filter(Q(ip_registration=None) | Q(ip_registration=""))
+        
+        if search:
+            queryset = queryset.filter(
+                Q(title__icontains=search) | 
+                Q(capstone_group__name=search) | 
+                Q(capstone_group__academic_year=search) | 
+                Q(keywords__overlap=search)
+            )
+            
+        if sort_by:
+            if sort_by.lower() == "newest":
+                queryset = queryset.order_by('-created_at')
+            elif sort_by.lower() == "oldest":
+                queryset = queryset.order_by('created_at')
+            elif sort_by.lower() == "alphabetical_asc":
+                queryset = queryset.order_by('title')
+            elif sort_by.lower() == "alphabetical_desc":
+                queryset = queryset.order_by('-title')
+            
+        serialized_data = self.serializer_class(queryset).data
+        
         return Response(serialized_data, status=status.HTTP_200_OK)
     
     @swagger_auto_schema(
