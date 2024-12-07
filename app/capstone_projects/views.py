@@ -58,9 +58,12 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         role = user.role.lower()
         
         if role in ["admin", "administrator"]:
-            return CapstoneProjects.objects.order_by('-created_at')
-        
-        return CapstoneProjects.objects.filter(capstone_group=user.group).order_by('-created_at')
+            queryset = CapstoneProjects.objects.order_by('-created_at')
+        else:
+            queryset = CapstoneProjects.objects.filter(capstone_group=user.group).order_by('-created_at')
+            
+        queryset = queryset.exclude(Q(is_approved__isnull=True) | Q(is_approved=""))
+        return queryset
     
     @swagger_auto_schema(
         request_body=CapstoneProjectsCustomSerializer,
@@ -307,7 +310,8 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
                 queryset = queryset.order_by('title')
             elif sort_by.lower() == "alphabetical_desc":
                 queryset = queryset.order_by('-title')
-            
+        
+        queryset = queryset.exclude(Q(is_approved__isnull=True) | Q(is_approved=""))
         serialized_data = self.serializer_class(queryset).data
         
         return Response(serialized_data, status=status.HTTP_200_OK)
