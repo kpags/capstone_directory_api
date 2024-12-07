@@ -29,6 +29,7 @@ class CapstoneProjectsFilter(filters.FilterSet):
             Q(title__icontains=value) | 
             Q(capstone_group__name=value) | 
             Q(capstone_group__academic_year=value) | 
+            Q(date_published__icontains=value) |
             Q(keywords__overlap=array_values)
         )
     
