@@ -74,6 +74,8 @@ class MeAPIView(APIView):
             "email": user.email,
             "role": user.role,
             "is_active": user.is_active,
+            "course": getattr(user, "course", None),
+            "specialization": getattr(user, "specialization", None),
         }
         
         if hasattr(user, "group"):
