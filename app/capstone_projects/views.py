@@ -55,15 +55,20 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
     @swagger_auto_schema()
     def get_queryset(self):
         user = self.request.instance
-        role = user.role.lower()
+        role = user.role
+        user_course = user.course
         
-        if role in ["admin", "administrator"]:
-            queryset = CapstoneProjects.objects.order_by('-created_at')
-        else:
-            queryset = CapstoneProjects.objects.filter(capstone_group=user.group).order_by('-created_at')
+        if role.lower() in ["admin", "administrator"]:
+            queryset = CapstoneProjects.objects.all()
+        
+        if role.lower() == "student":
+            user_spec = user.specialization
+            queryset = CapstoneProjects.objects.filter(specialization=user_spec)
             
-        queryset = queryset.exclude(is_approved='false')
-        return queryset
+        if role.lower() in ['faculty', 'coordinator', 'capstone coordinator']:
+            queryset = CapstoneProjects.objects.filter(course=user_course)
+            
+        return queryset.order_by('-created_at')
     
     @swagger_auto_schema(
         request_body=CapstoneProjectsCustomSerializer,
@@ -74,6 +79,12 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         user = request.instance
         data = request.data
+        
+        if user.role.lower() not in ['admin', 'administrator', 'students']:
+            return Response({
+                "message": "Only students and administrators can upload projects."
+            }, status=status.HTTP_401_UNAUTHORIZED)
+            
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
@@ -177,17 +188,23 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
     )
     def update(self, request, *args, **kwargs):
         data = request.data
+        data_copy = data.copy()
         user = request.instance
         project = self.get_object()
         
-        if not user.role.lower() in ["admin", "administrator"]:
-            return Response({
-                "message": "Only administrators can update the details capstone projects."
-            }, status=status.HTTP_401_UNAUTHORIZED)
-            
-        capstone_group_id = data.get("capstone_group_id", None)
+        acm_paper = data_copy.get('acm_paper', None)
         
-        serializer = CapstoneProjectsSerializer(data=data, instance=project)
+        if acm_paper and isinstance(acm_paper, str):
+            data_copy.pop('acm_paper', None)
+        
+        # if not user.role.lower() in ["admin", "administrator"]:
+        #     return Response({
+        #         "message": "Only administrators can update the details capstone projects."
+        #     }, status=status.HTTP_401_UNAUTHORIZED)
+            
+        capstone_group_id = data_copy.get("capstone_group_id", None)
+        
+        serializer = CapstoneProjectsSerializer(data=data_copy, instance=project)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
         
@@ -207,18 +224,23 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
                     validated_data["members"] = members
                     
         acm_file = validated_data.pop("acm_paper", None)
-        keywords = generate_pdf_keywords(file=acm_file)
+        
+        if acm_file:
+            keywords = generate_pdf_keywords(file=acm_file)
+            
+            binary_acm_form_file = request.FILES["acm_paper"]
+            cloudinary_response = upload_to_cloudinary(file=binary_acm_form_file)
+            acm_file_url = cloudinary_response.get("url", None)
+            project.acm_paper = acm_file_url
+            project.keywords = keywords
+
         capstone_group_id = validated_data.get("capstone_group_id", None)
         group = None
         
-        binary_acm_form_file = request.FILES["acm_paper"]
-        cloudinary_response = upload_to_cloudinary(file=binary_acm_form_file)
-        acm_file_url = cloudinary_response.get("url", None)
-        
-        project.keywords = keywords
-        project.acm_paper = acm_file_url
         for field, value in validated_data.items():
             setattr(project, field, value)
+        
+        project.is_approved = "pending"
         project.save()
             
         serialized_data = CapstoneProjectsSerializer(project).data
@@ -319,8 +341,11 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
                 queryset = queryset.order_by('-title')
         
         queryset = queryset.exclude(is_approved='false')
-        serialized_data = self.serializer_class(queryset).data
+
+        if not queryset:
+            return Response({}, status=status.HTTP_200_OK)
         
+        serialized_data = self.serializer_class(queryset, many=True).data
         return Response(serialized_data, status=status.HTTP_200_OK)
     
     @swagger_auto_schema(

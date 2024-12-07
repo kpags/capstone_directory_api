@@ -319,7 +319,7 @@ class UsersViewset(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ["first_name", "last_name", "email"]
     filterset_fields = ["role", "is_active", "course", "specialization"]
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsActive]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -336,21 +336,27 @@ class UsersViewset(viewsets.ModelViewSet):
         if role.lower() in ["admin", "administrator"]:
             return Users.objects.order_by("last_name")
         elif role.lower() == "faculty":
-            return Users.objects.filter(role="student")
+            return Users.objects.filter(role="student").order_by("last_name")
         elif role.lower() in ["coordinator", "capstone coordinator"]:
-            return Users.objects.filter(role__in=["student", "faculty"])
+            return Users.objects.filter(role__in=["student", "faculty"]).order_by("last_name")
         else:
-            return Users.objects.filter(id=user.id)
+            return Users.objects.filter(id=user.id).order_by("last_name")
         
     def create(self, request, *args, **kwargs):
         data = request.data
         user = request.instance
         
-        student_number = data.get('student_number')
-        existing_student_number = Users.objects.filter(student_number=student_number)
+        if user.role.lower() not in ['admin', 'administrator']:
+            return Response({"message": "Only administrators can create new users."}, status=status.HTTP_403_FORBIDDEN)
         
-        if existing_student_number.exists():
-            return Response({"message": f"Student with student number '{student_number}' already exists."})
+        created_role = data.get('role', None)
+        
+        if created_role.lower() == 'student':
+            student_number = data.get('student_number')
+            existing_student_number = Users.objects.filter(student_number=student_number)
+            
+            if existing_student_number.exists():
+                return Response({"message": f"Student with student number '{student_number}' already exists."})
         
         serializer = self.serializer_class(data=data)
         serializer.is_valid(raise_exception=True)
@@ -421,8 +427,8 @@ class UsersViewset(viewsets.ModelViewSet):
         df = df.fillna('')
         file_data = df.to_dict(orient="records")
         
-        self.upload_users_from_excel(file_data=file_data)
         create_activity_log(actor=user, action="Uploaded an excel file of users.")
+        self.upload_users_from_excel(file_data=file_data)
         
         return Response({
             "message": f"{str(file)} is being uploaded."
@@ -442,6 +448,9 @@ class UsersViewset(viewsets.ModelViewSet):
                 course = row.get('Course', None)
                 specialization = row.get('Specialization', None)
                 role = row["Role"]
+                
+                if email is None or email == "":
+                    break
                 
                 created_user = Users(
                     first_name=first_name.title(),

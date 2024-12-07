@@ -23,7 +23,7 @@ class CapstoneProjectsFilter(filters.FilterSet):
         return queryset.filter(Q(capstone_group__specialization__iexact=value) | Q(specialization__iexact=value))
     
     def filter_by_approval_status(self, queryset, name, value):
-        return queryset.filter(is_approved=value.lower())
+        return queryset.filter(is_approved__iexact=value)
     
     def filter_by_search(self, queryset, name, value):
         array_values = value.lower().split(" ")

@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from .models import CapstoneProjects
 
 class CapstoneProjectsSerializer(serializers.ModelSerializer):
-    acm_paper = serializers.FileField(write_only=True)
+    acm_paper = serializers.FileField(write_only=True, required=False)
     
     class Meta:
         model = CapstoneProjects
