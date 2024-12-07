@@ -143,7 +143,9 @@ class LoginAPIView(APIView):
                 )
 
             access_token, refresh_token = encode_tokens(user=user)
-
+            user.login_failed_attempts = 0
+            user.save()
+            
             return Response(
                 {
                     "id": user.id,

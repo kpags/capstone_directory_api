@@ -229,6 +229,13 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter(
+                "specialization",
+                openapi.IN_QUERY,
+                description="Sort by specialization (For Faculty/Capstone Coordinator only)",
+                type=openapi.TYPE_STRING,
+                required=False,
+            ),
+            openapi.Parameter(
                 "is_best_project",
                 openapi.IN_QUERY,
                 description="Filter by best projects or not",
