@@ -4,7 +4,7 @@ from .models import CapstoneProjects
 
 class CapstoneProjectsFilter(filters.FilterSet):
     is_best_project = filters.BooleanFilter(field_name="is_best_project")
-    is_approved = filters.BooleanFilter(field_name="is_approved")
+    is_approved = filters.CharFilter(method="filter_by_approval_status")
     status = filters.CharFilter(field_name="status", lookup_expr="iexact")
     sort_by = filters.CharFilter(method="filter_by_sort_type")
     is_ip_registered = filters.CharFilter(method="filter_by_is_ip_registered")
@@ -21,6 +21,9 @@ class CapstoneProjectsFilter(filters.FilterSet):
     
     def filter_by_specialization(self, queryset, name, value):
         return queryset.filter(Q(capstone_group__specialization__iexact=value) | Q(specialization__iexact=value))
+    
+    def filter_by_approval_status(self, queryset, name, value):
+        return queryset.filter(is_approved=value.lower())
     
     def filter_by_search(self, queryset, name, value):
         array_values = value.lower().split(" ")

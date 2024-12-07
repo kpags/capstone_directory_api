@@ -8,7 +8,7 @@ class CapstoneProjectsAdmin(admin.ModelAdmin):
         self.list_display = [field.name for field in model._meta.fields]
         super().__init__(model, admin_site)
         
-    list_filter = ['status', 'is_approved', 'is_best_project']
-    search_fields = ['title', 'capstone_group__name', 'capstone_group__academic_year']
+    list_filter = ['status', 'is_best_project']
+    search_fields = ['title', 'is_approved', 'capstone_group__name', 'capstone_group__academic_year']
     
 admin.site.register(CapstoneProjects, CapstoneProjectsAdmin)

@@ -62,7 +62,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         else:
             queryset = CapstoneProjects.objects.filter(capstone_group=user.group).order_by('-created_at')
             
-        queryset = queryset.exclude(Q(is_approved__isnull=True) | Q(is_approved=""))
+        queryset = queryset.exclude(is_approved='false')
         return queryset
     
     @swagger_auto_schema(
@@ -120,7 +120,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         )
         
         if user.role.lower() in ['admin', 'administrator']:
-            project.is_approved = True
+            project.is_approved = 'true'
         
         project.save()
         serialized_data = serializer.data
@@ -318,7 +318,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
             elif sort_by.lower() == "alphabetical_desc":
                 queryset = queryset.order_by('-title')
         
-        queryset = queryset.exclude(Q(is_approved__isnull=True) | Q(is_approved=""))
+        queryset = queryset.exclude(is_approved='false')
         serialized_data = self.serializer_class(queryset).data
         
         return Response(serialized_data, status=status.HTTP_200_OK)
@@ -354,9 +354,9 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
             existing_project._for_approval = True
             existing_project.save()
             
-            if is_approved:
+            if is_approved == 'true':
                 approve_word = "Approved"
-            else:
+            elif is_approved == 'false':
                 approve_word = "Rejected"
                 
             has_group = getattr(existing_project, "capstone_group", None)

@@ -21,7 +21,7 @@ class CapstoneProjects(models.Model):
     is_best_project = models.BooleanField(default=False)
     date_published = models.DateField(null=True, blank=True)
     status = models.CharField(null=True, blank=True)
-    is_approved = models.BooleanField(default=False, null=True, blank=True)
+    is_approved = models.CharField(default="pending")
     course = models.CharField(null=True, blank=True, max_length=255)
     specialization = models.CharField(null=True, blank=True, max_length=255)
     
@@ -34,5 +34,7 @@ class CapstoneProjects(models.Model):
     def save(self, *args, **kwargs):
         if self.status:
             self.status = self.status.title()
+        
+        self.is_approved = self.is_approved.lower()
         
         super(CapstoneProjects, self).save(*args, **kwargs)
