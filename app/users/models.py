@@ -43,6 +43,8 @@ class Users(models.Model):
     )
     is_active = models.BooleanField(default=True)
     token=models.TextField(null=True, blank=True)
+    login_failed_attempts=models.IntegerField(default=0)
+    temporary_disabled_date=models.DateTimeField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.first_name = self.first_name.title()

@@ -32,6 +32,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.conf import settings
 import os, random, string
+from django.utils import timezone
 
 # Create your views here.
 class MeAPIView(APIView):
@@ -117,9 +118,27 @@ class LoginAPIView(APIView):
             user = Users.objects.get(email=email)
             is_password_correct = check_password(password, user.password)
 
-            if not is_password_correct:
+            if user.login_failed_attempts == 3:
                 return Response(
-                    {"message": "Invalid password."},
+                    {"message": "Account still disabled due to multiple failed login attempts. To activate, please reset your password."},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+                
+            if not is_password_correct:
+                message = "Invalid password."
+                
+                login_failed_attempts = user.login_failed_attempts
+                login_failed_attempts += 1
+                user.login_failed_attempts = login_failed_attempts
+                
+                if login_failed_attempts == 3:
+                    user.temporary_disabled_date = timezone.now()
+                    message = "Account disabled due to multiple failed login attempts. To activate, please reset your password."
+                    
+                user.save()
+                
+                return Response(
+                    {"message": message},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -226,6 +245,8 @@ class ResetPasswordAPIView(APIView):
             existing_user_with_token.password=confirm_password
             existing_user_with_token.token = None
             existing_user_with_token._is_notif = False
+            existing_user_with_token.login_failed_attempts = 0
+            existing_user_with_token.temporary_disabled_date = None
             existing_user_with_token.save()
             
             return Response({
