@@ -468,10 +468,16 @@ class UsersViewset(viewsets.ModelViewSet):
             setattr(instance, field, value)
         
         new_group = validated_data.get('group', None)
+
+        if new_group:
+            group_members = Users.objects.filter(group=new_group).values_list('id', flat=True)
+            
+            if len(group_members) == 4 and instance.id not in group_members:
+                return Response({"message": "A group can only have exactly 4 members."}, status=status.HTTP_400_BAD_REQUEST)
         
-        if new_group and old_group != new_group:
-            instance._is_notif = True
-        
+            if old_group != new_group:
+                instance._is_notif = True
+            
         instance.save()
         
         create_activity_log(actor=user, action=f"Updated user '{instance.email}'.")
