@@ -360,6 +360,14 @@ class ChangeCurrentPasswordAPIView(APIView):
         current_password = data["current_password"]
         new_password = data["new_password"]
 
+        is_current_password_correct = check_password(current_password, user.password)
+        
+        if not is_current_password_correct:
+            return Response(
+                {"message": "Entered current password is incorrect."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+            
         password_validator_throws_exception(
             password=new_password,
             old_password=current_password,
