@@ -86,6 +86,8 @@ class MeAPIView(APIView):
                     "academic_year": user.group.academic_year,
                     "course_spec": f"{user.group.course} - {user.group.specialization}",
                 }
+            else:
+                data["group"] = None
         else:
             data["group"] = None
             
