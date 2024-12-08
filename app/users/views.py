@@ -138,7 +138,7 @@ class LoginAPIView(APIView):
                     
                 if login_failed_attempts == 6:
                     user.temporary_disabled_date = timezone.now()
-                    message = "Account is temporarily locked for hour after another multiple failed login attempts."
+                    message = "Account is temporarily locked for 1 hour after another multiple failed login attempts."
                     
                 if login_failed_attempts == 9:
                     user.temporary_disabled_date = timezone.now()
