@@ -124,12 +124,6 @@ class LoginAPIView(APIView):
         try:
             user = Users.objects.get(email=email)
             is_password_correct = check_password(password, user.password)
-
-            if user.login_failed_attempts == 3:
-                return Response(
-                    {"message": "Account still disabled due to multiple failed login attempts. To activate, please reset your password."},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
                 
             if not is_password_correct:
                 message = "Invalid password."
@@ -140,7 +134,15 @@ class LoginAPIView(APIView):
                 
                 if login_failed_attempts == 3:
                     user.temporary_disabled_date = timezone.now()
-                    message = "Account disabled due to multiple failed login attempts. To activate, please reset your password."
+                    message = "Account is temporarily locked for 10 minutes after multiple failed login attempts."
+                    
+                if login_failed_attempts == 6:
+                    user.temporary_disabled_date = timezone.now()
+                    message = "Account is temporarily locked for hour after another multiple failed login attempts."
+                    
+                if login_failed_attempts == 9:
+                    user.temporary_disabled_date = timezone.now()
+                    message = "Account is disabled due to multiple failed login attempts. Reset your password to reactivate your account."
                     
                 user.save()
                 
@@ -148,9 +150,38 @@ class LoginAPIView(APIView):
                     {"message": message},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+                
+            current_date_time = timezone.now()
+            
+            if user.login_failed_attempts == 3:
+                time_difference = current_date_time - user.temporary_disabled_date
+                minutes_difference = abs(int(time_difference.total_seconds() // 60))
+                
+                if minutes_difference < 10:
+                    return Response(
+                        {"message": f"Account still temporarily locked for {10 - minutes_difference} minutes due to multiple failed login attempts."},
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
+            
+            if user.login_failed_attempts == 6:
+                time_difference = current_date_time - user.temporary_disabled_date
+                minutes_difference = abs(int(time_difference.total_seconds() // 60))
+                
+                if minutes_difference < 60:
+                    return Response(
+                        {"message": f"Account still temporarily locked for {60 - minutes_difference} minutes due to multiple failed login attempts."},
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
+                    
+            if user.login_failed_attempts == 9:
+                return Response(
+                    {"message": f"Account still disabled due to multiple failed login attempts. Reset your password to reactivate your account."},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
 
             access_token, refresh_token = encode_tokens(user=user)
             user.login_failed_attempts = 0
+            user.temporary_disabled_date = None
             user.save()
             
             return Response(
