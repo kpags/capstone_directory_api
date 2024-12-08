@@ -86,7 +86,9 @@ class MeAPIView(APIView):
                     "academic_year": user.group.academic_year,
                     "course_spec": f"{user.group.course} - {user.group.specialization}",
                 }
-        
+        else:
+            data["group"] = None
+            
         technical_advisor_group = TechnicalAdvisorGroups.objects.filter(user=user).exists()
         
         data["is_technical_adviser"] = technical_advisor_group
