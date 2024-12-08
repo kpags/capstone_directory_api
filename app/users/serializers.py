@@ -8,7 +8,16 @@ class CSVFileSerializer(
 ):  # For bulk creation of users throgh upload
     file = serializers.FileField()
 
-
+class RegisterSerializer(serializers.Serializer):
+    first_name = serializers.CharField(max_length=255)
+    last_name = serializers.CharField(max_length=255)
+    student_number = serializers.CharField(max_length=1000)
+    email = serializers.EmailField()
+    password = serializers.CharField()
+    confirm_password = serializers.CharField()
+    course = serializers.CharField(max_length=255)
+    specialization = serializers.CharField(max_length=255)
+    
 class EmailAndPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()

@@ -13,7 +13,8 @@ from .serializers import (
     CapstoneGroupsSerializer,
     CSVFileSerializer,
     EmailSerializer,
-    ResetPasswordSerializer
+    ResetPasswordSerializer,
+    RegisterSerializer
 )
 from rest_framework_simplejwt.tokens import RefreshToken
 from utils.auth import encode_tokens
@@ -166,6 +167,74 @@ class LoginAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+
+class StudentRegisterAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
+    serializer_class = RegisterSerializer
+    
+    @swagger_auto_schema(
+        request_body=RegisterSerializer,
+        responses={
+            200: UsersSerializer(many=False),
+            400: "Email/Student number is already registered | Password Validation Messages",
+        }
+    )
+    def post(self, request):
+        data = request.data
+        
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+        
+        first_name = validated_data['first_name']
+        last_name = validated_data['last_name']
+        student_number = validated_data['student_number']
+        email = validated_data['email']
+        password = validated_data['password']
+        confirm_password = validated_data['confirm_password']
+        course = validated_data['course']
+        specialization = validated_data['specialization']
+        
+        existing_email = Users.objects.filter(email=email)
+        existing_student_number = Users.objects.filter(student_number=student_number)
+        
+        if existing_email:
+            return Response(
+                {"message": f"Email {email} is already registered."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        if existing_student_number:
+            return Response(
+                {"message": f"Student number {student_number} is already registered."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        if password != confirm_password:
+            return Response(
+                {"message": "Passwords do not match."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        password_validator_throws_exception(password=confirm_password, has_capital_letter_checker=True, has_digit_checker=True, has_special_char_checker=True)
+        
+        created_student = Users(
+            first_name=first_name,
+            last_name=last_name,
+            student_number=student_number,
+            email=email,
+            password=make_password(confirm_password),
+            role="Student",
+            course=course,
+            specialization=specialization,
+        )
+        created_student._is_notif = False
+        created_student.save()
+        
+        serialized_data = UsersSerializer(created_student).data
+        return Response(serialized_data, status=status.HTTP_201_CREATED)
+        
 class ForgotPasswordAPIView(APIView):
     authentication_classes = []
     permission_classes = []

@@ -9,7 +9,8 @@ from .views import (
     ChangeCurrentPasswordAPIView, 
     MeAPIView, 
     ForgotPasswordAPIView, 
-    ResetPasswordAPIView
+    ResetPasswordAPIView,
+    StudentRegisterAPIView
 )
 
 app_name = "users"
@@ -22,6 +23,7 @@ router.register(r"groups", views.CapstoneGroupsViewset, basename="groups")
 urlpatterns = [
     path("me/", views.MeAPIView.as_view(), name="me"),
     path("login/", views.LoginAPIView.as_view(), name="login"),
+    path("student-register", views.StudentRegisterAPIView.as_view(), name="student-register"),
     path(
         "change-password/",
         views.ChangeCurrentPasswordAPIView.as_view(),
