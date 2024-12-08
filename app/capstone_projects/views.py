@@ -427,6 +427,23 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         
         try:
             existing_project = CapstoneProjects.objects.get(id=project_id)
+            has_group = getattr(existing_project, 'capstone_group', None)
+            
+            if not has_group:
+                raise ValidationError({
+                    "message": "Project must be associated with a group to mark it as a best project. Must be a project from alumni."
+                })
+            
+            academic_year = existing_project.capstone_group.academic_year
+            
+            if is_best_project is True:
+                academic_year_projects = CapstoneProjects.objects.filter(capstone_group__academic_year=academic_year, is_best_project=True)
+                
+                if academic_year_projects.count() == 3:
+                    raise ValidationError({
+                        "message": "A maximum of 3 best projects can be marked for each academic year."
+                    })
+                
             existing_project.is_best_project = is_best_project
             existing_project._for_best_project = True
             existing_project.save()
