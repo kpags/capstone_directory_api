@@ -80,7 +80,7 @@ class CapstoneProjectsViewset(viewsets.ModelViewSet):
         user = request.instance
         data = request.data
         
-        if user.role.lower() not in ['admin', 'administrator', 'students']:
+        if user.role.lower() not in ['admin', 'administrator', 'student']:
             return Response({
                 "message": "Only students and administrators can upload projects."
             }, status=status.HTTP_401_UNAUTHORIZED)
